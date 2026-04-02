@@ -2,7 +2,8 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>YMM Karşıt İnceleme Robotu v16 (Mükemmel Hizalama)</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>">
+    <title>CPA-FTC Pro Karşıt İnceleme Robotu </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
@@ -253,6 +254,7 @@
 <body onload="initApp()">
 
     <input type="file" id="invoiceExcelInput" accept=".xlsx, .xls" style="display:none" onchange="handleInvoiceUpload(this)">
+    <input type="file" id="salesExcelInput" accept=".xlsx, .xls" style="display:none" onchange="handleSalesUpload(this)">
     <input type="file" id="backupInput" accept=".json" style="display:none" onchange="uploadBackup(this)">
 
     <div id="modalYMMManager" class="modal">
@@ -278,6 +280,27 @@
                 <input type="text" id="newClientAddress" placeholder="Adres" style="margin-top:5px;">
                 <input type="text" id="newClientContract" placeholder="Sözleşme Tarih/No" style="margin-top:5px;">
                 <button class="btn btn-green" style="width:100%; margin-top:10px;" onclick="saveNewClient()">Müşteri Kaydet</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalEditClient" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <div class="modal-header">
+                <span class="modal-title">✏️ Seçili Müşteriyi Güncelle</span>
+                <button class="btn btn-red" onclick="closeModal('modalEditClient')">X</button>
+            </div>
+            <div style="background:#fff3e0; padding:15px; border-radius:5px;">
+                <div style="font-size:11px; color:#666; margin-bottom:5px;">* Değişiklikler anında buluta (Firebase) kaydedilir.</div>
+                <label style="font-size: 11px; font-weight: bold;">Müşteri Unvanı</label>
+                <input type="text" id="updClientName" style="margin-bottom:10px;">
+                <label style="font-size: 11px; font-weight: bold;">Vergi Dairesi / No</label>
+                <input type="text" id="updClientTax" style="margin-bottom:10px;">
+                <label style="font-size: 11px; font-weight: bold;">Adres</label>
+                <input type="text" id="updClientAddress" style="margin-bottom:10px;">
+                <label style="font-size: 11px; font-weight: bold;">Sözleşme Tarih/No</label>
+                <input type="text" id="updClientContract" style="margin-bottom:10px;">
+                <button class="btn btn-orange" style="width:100%; margin-top:10px; padding: 10px;" onclick="updateClientData()">Müşteriyi Güncelle ve Kaydet</button>
             </div>
         </div>
     </div>
@@ -407,7 +430,10 @@
         </div>
         <div class="control-group">
             <label>3. Müşteri</label>
-            <select id="clientSelect" onchange="handleClientChange()" style="width:180px;"></select>
+            <div style="display:flex; gap:5px;">
+                <select id="clientSelect" onchange="handleClientChange()" style="width:180px;"></select>
+                <button class="btn btn-orange" id="btnEditClient" onclick="editSelectedClient()" title="Seçili Müşteriyi Düzenle" disabled>✏️</button>
+            </div>
         </div>
         <div style="border-right:1px solid #555; height:30px;"></div>
         <div class="control-group">
@@ -560,7 +586,13 @@
         </div>
 
         <div class="section">
-            <strong>8. MAL VE HİZMET SATIŞLARI</strong>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <strong>8. MAL VE HİZMET SATIŞLARI</strong>
+                <div class="no-print" style="display:flex; gap:5px;">
+                    <button class="btn btn-orange" onclick="downloadSalesTemplate()" style="font-size:11px; padding:3px 8px;">📥 Şablon İndir</button>
+                    <button class="btn btn-green" onclick="document.getElementById('salesExcelInput').click()" style="font-size:11px; padding:3px 8px;">📤 Excel'den Yükle</button>
+                </div>
+            </div>
             <table id="tblSatis">
                 <thead><tr><th>Tarih</th><th>Fatura No</th><th>Tutar</th><th>KDV</th><th>Yevmiye Kayıt</th></tr></thead>
                 <tbody>
@@ -606,12 +638,12 @@
         
         <div class="footer-edit-area no-print">
             Alt Bilgi (Yazdırma sırasında sayfa altında görünür):<br>
-            <input type="text" id="footerTextInput" class="footer-input" value="Bu rapor YMM Karşıt İnceleme Robotu ile oluşturulmuştur." oninput="updateFooterText(this.value)">
+            <input type="text" id="footerTextInput" class="footer-input" value="Bu rapor CPA-FTC 💎 YMM Karşıt İnceleme Robotu ile oluşturulmuştur." oninput="updateFooterText(this.value)">
         </div>
     </div>
 
     <div class="page-footer">
-        <span id="footerTextDisplay">Bu rapor YMM Karşıt İnceleme Robotu ile oluşturulmuştur.</span>
+        <span id="footerTextDisplay">Bu rapor CPA-FTC 💎 YMM Karşıt İnceleme Robotu ile oluşturulmuştur.</span>
     </div>
 
     <div id="authScreen">
@@ -924,11 +956,15 @@
             const c = (f.years && f.years[year] && f.years[year][mIdx]) || {};
             const p = (f.years && f.years[pY] && f.years[pY][pM]) || {};
             const safe = (v)=>v||"";
-            const kdvFields = [ {k:'matrah', id:'matrah'},{k:'hesap', id:'hesap'},{k:'ilave', id:'ilave'},{k:'toplam', id:'toplam'}, {k:'onceki_dev', id:'onceki'},{k:'yurtici', id:'yurtici'},{k:'ind', id:'ind'},{k:'ode', id:'ode'}, {k:'sonraki_dev', id:'sonraki'},{k:'tahakkuk', id:'tahakkuk'} ];
+            const kdvFields = [ {k:'matrah', id:'matrah'},{k:'hesap', id:'hesap'},{k:'ilave', id:'ilave'},{k:'toplam', id:'toplam'}, {k:'onceki_dev', id:'onceki'},{k:'yurtici', id:'yurtici'},{k:'ind', id:'ind'},{k:'ode', id:'ode'}, {k:'sonraki_dev', id:'sonraki'} ];
             kdvFields.forEach(field => {
                 const elCurr = document.getElementById(`kdv_curr_${field.id}`); const elPrev = document.getElementById(`kdv_prev_${field.id}`);
                 if(elCurr) elCurr.value = formatMoney(c[field.k]); if(elPrev) elPrev.value = formatMoney(p[field.k]);
             });
+            
+            // TAHAKKUK FİŞİ METİN OLARAK AKTARILIR (Sayı formatı bozmasın diye)
+            const elCurrTah = document.getElementById('kdv_curr_tahakkuk'); const elPrevTah = document.getElementById('kdv_prev_tahakkuk');
+            if(elCurrTah) elCurrTah.value = safe(c['tahakkuk']); if(elPrevTah) elPrevTah.value = safe(p['tahakkuk']);
             ['yevTarih','yevDonem','yevNo','kebTarih','kebDonem','kebNo','envNoter','envTarih','envNo','isci','muhtasar'].forEach(k => {
                 const el = document.getElementById(`val_${k}`); if(el) { el.value = safe(c[k]); autoResize(el); }
             });
@@ -984,6 +1020,95 @@
             });
             alert(`${top10.length} adet fatura aktarıldı!`);
         }
+        // --- SATIŞLAR (BÖLÜM 8) EXCEL FONKSİYONLARI ---
+        function downloadSalesTemplate() {
+            const wb = XLSX.utils.book_new();
+            // Satış şablonunda VKN zorunludur ki müşteriye ait olanları filtreleyebilelim.
+            const ws_data = [ ["Tarih", "FaturaNo", "Alici_VKN_TC", "Tutar", "KDV", "Yevmiye_Kayit"], ["2024-05-15", "S-202", "1234567890", 25000, 5000, "15.05.2024 / 455"] ];
+            const ws = XLSX.utils.aoa_to_sheet(ws_data); XLSX.utils.book_append_sheet(wb, ws, "Satislar"); XLSX.writeFile(wb, "Satis_Sablonu.xlsx");
+        }
+
+        function handleSalesUpload(input) {
+            const file = input.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header:1}); 
+                if(jsonData.length < 2) { alert("Excel boş veya hatalı!"); return; }
+                processSalesData(jsonData.slice(1));
+            };
+            reader.readAsArrayBuffer(file); input.value = "";
+        }
+
+        function processSalesData(rows) {
+            const repDate = document.getElementById('reportDate').value; 
+            if (!repDate) { alert("Lütfen önce 1. Tutanak Dönemi seçiniz!"); return; }
+            
+            const yIdx = document.getElementById('ymmSelect').value;
+            const cIdx = document.getElementById('clientSelect').value;
+            if (yIdx === "" || cIdx === "") { 
+                alert("Lütfen önce YMM ve Müşteri seçiniz! (Robot, Müşteri VKN'sine göre Excel'den filtreleme yapacaktır)"); 
+                return; 
+            }
+            
+            // HATA ÇÖZÜMÜ 1: VKN boş olsa bile sistemin patlamaması için güvenli hale getirildi.
+            const clientTax = (AppData.YMMs[yIdx].clients[cIdx].tax || "").toString().trim();
+            if(!clientTax) { 
+                alert("Seçili 3. Müşterinin Vergi/TC numarası eksik! Lütfen YMM menüsünden müşteri bilgilerini güncelleyin."); 
+                return; 
+            }
+
+            const [targetYear, targetMonth] = repDate.split('-');
+            let filtered = [];
+            
+            rows.forEach(row => {
+                let rDate = row[0]; 
+                let rFatNo = row[1] || "";
+                let rVkn = (row[2] || "").toString().trim(); // Alıcı VKN
+                let rAmount = parseFloat(row[3]) || 0; 
+                let rKDV = parseFloat(row[4]) || 0;
+                let rYevmiye = row[5] || "";
+
+                let jsDate; 
+                if (typeof rDate === 'number') { jsDate = new Date(Math.round((rDate - 25569)*86400*1000)); } 
+                else if (typeof rDate === 'string') { jsDate = new Date(rDate); }
+                
+                if (jsDate && !isNaN(jsDate)) {
+                    let y = jsDate.getFullYear().toString(); 
+                    let m = String(jsDate.getMonth() + 1).padStart(2, '0');
+                    
+                    // YENİ DÜZELTME BURADA: clientTax.includes(rVkn) kullanıyoruz!
+                    // Böylece müşteri kartında "KADIKÖY / 1234567890" yazsa bile içindeki sayıyı yakalayacak.
+                    if (y === targetYear && m === targetMonth && rVkn !== "" && clientTax.includes(rVkn)) {
+                        filtered.push({ tarih: `${jsDate.getDate()}.${m}.${y}`, faturaNo: rFatNo, tutar: rAmount, kdv: rKDV, yevmiye: rYevmiye });
+                    }
+                }
+            });
+            
+            // HATA ÇÖZÜMÜ 2: Eğer eşleşen fatura yoksa, tabloyu SİLMEDEN kullanıcıya uyarı veriyoruz.
+            if(filtered.length === 0) { 
+                alert(`Seçilen döneme ve seçili müşteriye (İçinde ${clientTax} geçen) ait satış faturası bulunamadı!`); 
+                return; 
+            }
+
+            const tbody = document.getElementById('tblSatis').getElementsByTagName('tbody')[0]; 
+            tbody.innerHTML = ""; // Artık elimizde veri olduğuna emin olduğumuz için eski tabloyu güvenle silebiliriz.
+            
+            filtered.forEach((item) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><textarea class="report-field text-center" oninput="autoResize(this)">${item.tarih}</textarea></td>
+                    <td><textarea class="report-field text-center" oninput="autoResize(this)">${item.faturaNo}</textarea></td>
+                    <td><textarea class="report-field text-right" oninput="autoResize(this)">${formatMoney(item.tutar)}</textarea></td>
+                    <td><textarea class="report-field text-right" oninput="autoResize(this)">${formatMoney(item.kdv)}</textarea></td>
+                    <td><textarea class="report-field" oninput="autoResize(this)">${item.yevmiye}</textarea></td>
+                `;
+                tbody.appendChild(tr); 
+                tr.querySelectorAll('textarea').forEach(ta => autoResize(ta));
+            });
+            alert(`${filtered.length} adet ilgili satış faturası aktarıldı!`);
+        }
 
         function handleFirmChange() {
             const idx = document.getElementById('firmSelect').value; document.getElementById('btnEditFirm').disabled = (idx==="");
@@ -992,14 +1117,24 @@
         function handleYMMChange() {
              const idx = document.getElementById('ymmSelect').value; const cSel = document.getElementById('clientSelect');
              cSel.innerHTML = '<option value="">-- Seçiniz --</option>'; setText('disp_ymmName',''); setText('sign_ymm','...');
+             
+             // YMM değiştiğinde müşteri düzenleme butonunu kapat
+             const btnEditC = document.getElementById('btnEditClient'); if(btnEditC) btnEditC.disabled = true;
+             
              if(idx!=="") {
                  const y = AppData.YMMs[idx]; setText('disp_ymmName', y.name); setText('disp_ymmCompany', y.company); setText('disp_ymmAddress', y.address); setText('disp_ymmInfo', `${y.phone} - ${y.seal}`); setText('sign_ymm', y.name);
                  if(y.clients) y.clients.forEach((c,i)=>{ let o=document.createElement('option'); o.value=i; o.text=c.name; cSel.appendChild(o); });
              }
         }
+        
         function handleClientChange() {
              const y = document.getElementById('ymmSelect').value; const c = document.getElementById('clientSelect').value;
+             
+             // Müşteri seçiliyse düzenleme butonunu aktif et
+             const btnEditC = document.getElementById('btnEditClient'); if(btnEditC) btnEditC.disabled = (c === "");
+             
              if(y!=="" && c!=="") { const cli = AppData.YMMs[y].clients[c]; setText('disp_clientName', cli.name); setText('disp_clientTax', cli.tax); setText('disp_clientAddress', cli.address); setText('disp_clientContract', cli.contract); }
+             else { setText('disp_clientName', ''); setText('disp_clientTax', ''); setText('disp_clientAddress', ''); setText('disp_clientContract', ''); }
         }
         function saveNewYMM() {
              const n=document.getElementById('newYmmName').value; if(!n)return;
@@ -1011,7 +1146,41 @@
              AppData.YMMs[y].clients.push({name:document.getElementById('newClientName').value, tax:document.getElementById('newClientTax').value, address:document.getElementById('newClientAddress').value, contract:document.getElementById('newClientContract').value});
              saveData(); closeModal('modalYMMManager'); handleYMMChange();
         }
+        // --- SEÇİLİ MÜŞTERİYİ GÜNCELLEME FONKSİYONLARI ---
+        function editSelectedClient() {
+            const yIdx = document.getElementById('ymmSelect').value;
+            const cIdx = document.getElementById('clientSelect').value;
+            if (yIdx === "" || cIdx === "") return;
 
+            const cli = AppData.YMMs[yIdx].clients[cIdx];
+            document.getElementById('updClientName').value = cli.name || '';
+            document.getElementById('updClientTax').value = cli.tax || '';
+            document.getElementById('updClientAddress').value = cli.address || '';
+            document.getElementById('updClientContract').value = cli.contract || '';
+
+            openModal('modalEditClient');
+        }
+
+        function updateClientData() {
+            const yIdx = document.getElementById('ymmSelect').value;
+            const cIdx = document.getElementById('clientSelect').value;
+            if (yIdx === "" || cIdx === "") return;
+
+            AppData.YMMs[yIdx].clients[cIdx].name = document.getElementById('updClientName').value;
+            AppData.YMMs[yIdx].clients[cIdx].tax = document.getElementById('updClientTax').value;
+            AppData.YMMs[yIdx].clients[cIdx].address = document.getElementById('updClientAddress').value;
+            AppData.YMMs[yIdx].clients[cIdx].contract = document.getElementById('updClientContract').value;
+
+            saveData(); // Buluta kaydet
+            closeModal('modalEditClient');
+            
+            // Arayüzü bozmadan güncel veriyi ekrana yansıt
+            handleYMMChange(); 
+            document.getElementById('clientSelect').value = cIdx; 
+            handleClientChange(); 
+            
+            alert("Müşteri bilgileri başarıyla güncellendi!");
+        }
         function openModal(id){document.getElementById(id).style.display='block';} function closeModal(id){document.getElementById(id).style.display='none';} function setText(id,v){const e=document.getElementById(id); if(e) e.innerText=v||"";}
         function addPartnerRow(n='', t='', s='') {
             const tb = document.getElementById('tblPartners').getElementsByTagName('tbody')[0];
