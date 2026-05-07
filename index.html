@@ -713,26 +713,28 @@
 
         // --- FIRESTORE VERİTABANI FONKSİYONLARI ---
         function loadDataFromFirestore() {
-            db.collection('users').doc(currentUser.uid).get().then(doc => {
-                if (doc.exists) {
-                    AppData = doc.data();
-                    if(!AppData.YMMs) AppData.YMMs = [];
-                    if(!AppData.Firms) AppData.Firms = [];
-                } else {
-                    AppData = { YMMs: [], Firms: [] };
-                }
-                renderSelects();
-                updateReportView();
-            }).catch(err => alert("Veri çekme hatası: " + err.message));
+    // 'users' koleksiyonu yerine herkesin okuyacağı 'shared_data' koleksiyonunu kullanıyoruz.
+    db.collection('shared_data').doc('main_data').get().then(doc => {
+        if (doc.exists) {
+            AppData = doc.data();
+            if(!AppData.YMMs) AppData.YMMs = [];
+            if(!AppData.Firms) AppData.Firms = [];
+        } else {
+            AppData = { YMMs: [], Firms: [] };
         }
+        renderSelects();
+        updateReportView();
+    }).catch(err => alert("Veri çekme hatası: " + err.message));
+}
 
         function saveData() {
-            if (currentUser) {
-                db.collection('users').doc(currentUser.uid).set(AppData)
-                    .then(() => { renderSelects(); })
-                    .catch(err => alert("Kayıt hatası: " + err.message));
-            }
-        }
+    if (currentUser) {
+        // Kaydı kişisel ID yerine ortak belgeye yapıyoruz
+        db.collection('shared_data').doc('main_data').set(AppData)
+            .then(() => { renderSelects(); })
+            .catch(err => alert("Kayıt hatası: " + err.message));
+    }
+}
 
         function saveAllData() {
             saveData();
@@ -808,7 +810,7 @@
                         
                         // Kullanıcı giriş yapmışsa buluta yazdır
                         if (currentUser) {
-                            db.collection('users').doc(currentUser.uid).set(AppData)
+                            db.collection('shared_data').doc('main_data').set(AppData)
                                 .then(() => {
                                     // Buluta kayıt BİTTİKTEN sonra ekranı güncelle
                                     renderSelects();
