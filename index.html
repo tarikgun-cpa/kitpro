@@ -10,18 +10,21 @@
         /* TEMEL AYARLAR */
         * { box-sizing: border-box; }
         
-        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.3; color: #000; max-width: 210mm; margin: 0 auto; padding: 20px; background: #f4f6f9; }
+        /* Tüm ekranı kullanan modern arkaplan */
+        body { font-family: 'Times New Roman', Times, serif; font-size: 12pt; line-height: 1.3; color: #000; margin: 0; padding: 20px; background: #e2e8f0; }
         
-        /* A4 GÖRÜNÜMÜ */
+        /* A4 GÖRÜNÜMÜ - Merkeze hizalı ve gölgeli gerçek kağıt efekti */
         .page-container { 
             background: white; 
             padding: 40px; 
-            padding-bottom: 60px; /* Footer için yer */
-            box-shadow: 0 0 15px rgba(0,0,0,0.1); 
-            margin-bottom: 20px; 
+            padding-bottom: 60px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
+            margin: 0 auto 40px auto; 
             min-height: 297mm; 
+            max-width: 210mm; /* Sadece A4 kağıdı 210mm olacak */
             width: 100%; 
             position: relative;
+            border-radius: 4px;
         }
 
         input:focus, textarea:focus, select:focus {
@@ -131,8 +134,10 @@
 
         /* MODERN KONTROL PANELİ */
         .control-bar { 
-            background: #ffffff; padding: 20px; border-radius: 12px; margin-bottom: 25px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; position: sticky; top: 10px; z-index: 100;
+            background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+            border: 1px solid #e2e8f0; position: sticky; top: 10px; z-index: 100; 
+            max-width: 1200px; /* Menü çok geniş ekranlarda sonsuza uzamasın */
+            margin: 0 auto 25px auto; /* Menüyü ortala */
         }
         .control-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; }
         .control-filters { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
@@ -259,6 +264,29 @@
         </div>
     </div>
 
+    <div id="modalEditYMM" class="modal">
+        <div class="modal-content" style="max-width: 500px; height: auto;">
+            <div class="modal-header">
+                <span class="modal-title">✏️ Seçili YMM'yi Güncelle</span>
+                <button class="btn btn-red" onclick="closeModal('modalEditYMM')">X</button>
+            </div>
+            <div style="background:#f4f6f9; padding:15px; border-radius:5px;">
+                <div style="font-size:11px; color:#666; margin-bottom:5px;">* Değişiklikler anında buluta (Firebase) kaydedilir.</div>
+                <label style="font-size: 11px; font-weight: bold;">YMM Adı Soyadı</label>
+                <input type="text" id="updYmmName" style="margin-bottom:10px;">
+                <label style="font-size: 11px; font-weight: bold;">Şirketi</label>
+                <input type="text" id="updYmmCompany" style="margin-bottom:10px;">
+                <label style="font-size: 11px; font-weight: bold;">Adresi</label>
+                <input type="text" id="updYmmAddress" style="margin-bottom:10px;">
+                <label style="font-size: 11px; font-weight: bold;">Telefon / Faks</label>
+                <input type="text" id="updYmmPhone" style="margin-bottom:10px;">
+                <label style="font-size: 11px; font-weight: bold;">Mühür No / VD</label>
+                <input type="text" id="updYmmSeal" style="margin-bottom:10px;">
+                <button class="btn btn-blue" style="width:100%; margin-top:10px; padding: 10px;" onclick="updateYMMData()">YMM'yi Güncelle ve Kaydet</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalFirmData" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -372,7 +400,7 @@
     <div class="control-bar no-print">
         <div class="control-header">
             <div style="display: flex; align-items: center;">
-                <img src="Logo.jpg" alt="KitPro Logo" style="height: 45px; margin-right: 15px; border-radius: 4px; border: 1px solid #eee;">
+                <img src="Logo.png" alt="KitPro Logo" style="height: 45px; margin-right: 15px; border-radius: 4px; border: 1px solid #eee;">
                 <h3 style="margin: 0; color: #1e293b; font-family: 'Segoe UI', sans-serif; letter-spacing: -0.5px;">Karşıt İnceleme Robotu</h3>
             </div>
             <div style="display: flex; gap: 10px;">
@@ -395,7 +423,8 @@
                 <label>2. YMM</label>
                 <div style="display:flex; gap:5px;">
                     <select id="ymmSelect" onchange="handleYMMChange()" style="width:200px;"></select>
-                    <button class="btn btn-dark" onclick="openModal('modalYMMManager')" style="padding: 8px 12px;">⚙️ Yönet</button>
+                    <button class="btn btn-dark" onclick="openModal('modalYMMManager')" title="Yeni YMM Ekle" style="padding: 8px 12px;">+ Yeni</button>
+                    <button class="btn btn-orange" id="btnEditYmm" onclick="editSelectedYMM()" title="Seçili YMM'yi Düzenle" disabled>✏️</button>
                 </div>
             </div>
             <div class="control-group">
@@ -889,6 +918,9 @@
              cSel.innerHTML = '<option value="">-- Seçiniz --</option>'; setText('disp_ymmName',''); setText('sign_ymm','...');
              const btnEditC = document.getElementById('btnEditClient'); if(btnEditC) btnEditC.disabled = true;
              
+             // YMM Düzenle butonunu kontrol et (YMM seçiliyse butonu aktif et)
+             const btnEditY = document.getElementById('btnEditYmm'); if(btnEditY) btnEditY.disabled = (idx === "");
+             
              if(idx!=="") {
                  const y = AppData.YMMs[idx]; setText('disp_ymmName', y.name); setText('disp_ymmCompany', y.company); setText('disp_ymmAddress', y.address); setText('disp_ymmInfo', `${y.phone} - ${y.seal}`); setText('sign_ymm', y.name);
                  if(y.clients) y.clients.forEach((c,i)=>{ let o=document.createElement('option'); o.value=i; o.text=c.name; cSel.appendChild(o); });
@@ -904,11 +936,27 @@
              if(document.getElementById('firmSelect').value !== "") updateReportView();
         }
 
-        // --- YMM & MÜŞTERİ KAYIT / GÜNCELLEME ---
-        function saveNewYMM() {
-             const n=document.getElementById('newYmmName').value; if(!n)return;
-             AppData.YMMs.push({name:n, company:document.getElementById('newYmmCompany').value, address:document.getElementById('newYmmAddress').value, phone:document.getElementById('newYmmPhone').value, seal:document.getElementById('newYmmSeal').value, clients:[]});
-             saveData(); closeModal('modalYMMManager');
+        function editSelectedYMM() {
+            const idx = document.getElementById('ymmSelect').value;
+            if (idx === "") return;
+            const y = AppData.YMMs[idx];
+            document.getElementById('updYmmName').value = y.name || '';
+            document.getElementById('updYmmCompany').value = y.company || '';
+            document.getElementById('updYmmAddress').value = y.address || '';
+            document.getElementById('updYmmPhone').value = y.phone || '';
+            document.getElementById('updYmmSeal').value = y.seal || '';
+            openModal('modalEditYMM');
+        }
+
+        function updateYMMData() {
+            const idx = document.getElementById('ymmSelect').value;
+            if (idx === "") return;
+            AppData.YMMs[idx].name = document.getElementById('updYmmName').value;
+            AppData.YMMs[idx].company = document.getElementById('updYmmCompany').value;
+            AppData.YMMs[idx].address = document.getElementById('updYmmAddress').value;
+            AppData.YMMs[idx].phone = document.getElementById('updYmmPhone').value;
+            AppData.YMMs[idx].seal = document.getElementById('updYmmSeal').value;
+            saveData(); closeModal('modalEditYMM'); renderSelects(); document.getElementById('ymmSelect').value = idx; handleYMMChange(); alert("YMM bilgileri başarıyla güncellendi!");
         }
         function saveNewClient() {
              const y=document.getElementById('ymmSelect').value; if(y==="")return;
