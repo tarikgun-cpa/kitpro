@@ -13,70 +13,70 @@
         
         body { 
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; 
-            background: #f1f5f9; /* Çok hafif, göz yormayan gri arkaplan */
+            background: #f8fafc; /* Daha ferah, açık gri */
             display: flex; 
             margin: 0;
             padding: 0;
             color: #334155;
         }
 
-        /* 1. AYDINLIK, FERAH YAN MENÜ (SADECE BEYAZ VE GRİ TONLAR) */
+        /* 1. YAN MENÜ (KAYDIRMA ÇUBUĞU GİZLENDİ) */
         .control-bar { 
-            background: #ffffff; /* Bembeyaz, ferah arkaplan */
+            background: #ffffff; 
             color: #334155;
-            width: 380px; 
+            width: 320px; 
             height: 100vh; 
             position: sticky; 
             top: 0; 
             flex-shrink: 0; 
             display: flex; 
             flex-direction: column; 
-            padding: 25px;
-            overflow-y: auto; 
+            padding: 20px;
             border-right: 1px solid #e2e8f0;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.03);
+            overflow-y: auto; 
+            -ms-overflow-style: none;  /* IE ve Edge */
+            scrollbar-width: none;  /* Firefox */
         }
+        .control-bar::-webkit-scrollbar { display: none; /* Chrome, Safari */ }
         
-        .control-header { text-align: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px; }
-        .control-header img { height: 75px; margin-bottom: 15px; } /* LOGO BÜYÜTÜLDÜ */
-        .control-header h3 { font-size: 16px; color: #0f172a; font-weight: 700; margin: 0; letter-spacing: 0px; }
+        .control-header { text-align: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px; }
+        .control-header img { height: 60px; margin-bottom: 10px; }
+        .control-header h3 { font-size: 15px; color: #0f172a; font-weight: 700; margin: 0; }
         
-        .control-header-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .control-header-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         
-        .control-filters { display: flex; flex-direction: column; gap: 16px; }
-        .control-group { display: flex; flex-direction: column; gap: 6px; }
+        .control-filters { display: flex; flex-direction: column; gap: 12px; }
+        .control-group { display: flex; flex-direction: column; gap: 4px; }
         .control-group label { color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* İNPUTLAR İÇİN SADE, MODERN ÇİZGİLER */
         .control-group select, .control-group input[type="month"] { 
             width: 100%; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #1e293b; 
-            border-radius: 6px; padding: 10px 12px; font-size: 13px; font-family: inherit; font-weight: 600;
+            border-radius: 4px; padding: 8px 10px; font-size: 13px; font-family: inherit; font-weight: 600;
             transition: all 0.2s;
         }
-        .control-group select:focus, .control-group input:focus { background-color: #ffffff; border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
-        .control-divider { height: 1px; background: #f1f5f9; margin: 5px 0; }
+        .control-group select:focus, .control-group input:focus { background-color: #ffffff; border-color: #475569; outline: none; box-shadow: 0 0 0 2px rgba(71, 85, 105, 0.1); }
+        .control-divider { height: 1px; background: #f1f5f9; margin: 2px 0; }
         
-        /* 2. BUTONLAR: RENK CÜMBÜŞÜNE SON! (Referans görselindeki sadelik) */
+        /* 2. KURUMSAL MONOKROM BUTONLAR (RENKLER SİLİNDİ) */
         .btn { 
-            border-radius: 6px; font-weight: 600; padding: 10px 12px; font-size: 12px; border: 1px solid transparent; 
+            border-radius: 4px; font-weight: 600; padding: 8px 10px; font-size: 12px; 
+            border: 1px solid #cbd5e1; background-color: #ffffff; color: #475569;
             cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
             font-family: inherit;
         }
+        .btn:hover { background-color: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        /* Standart İşlem Butonları (Beyaz Zemin, İnce Çizgi, Koyu Gri Yazı) */
-        .btn-blue, .btn-purple, .btn-dark, .btn-orange { background-color: #ffffff; color: #475569; border: 1px solid #cbd5e1; }
-        .btn-blue:hover, .btn-purple:hover, .btn-dark:hover, .btn-orange:hover { background-color: #f8fafc; color: #0f172a; border-color: #94a3b8; }
+        /* Özel İşlem Butonları (Kaydet vb.) */
+        .btn-primary { background-color: #1e293b !important; color: #ffffff !important; border-color: #1e293b !important; }
+        .btn-primary:hover { background-color: #0f172a !important; }
         
-        /* Ana Eylem Butonları (Yazdır, Kaydet) - Kurumsal Mavi */
-        .btn-green { background-color: #2563eb; color: #ffffff; border: none; }
-        .btn-green:hover { background-color: #1d4ed8; }
-        
-        /* Tehlikeli İşlemler (Sil, Çıkış) - Beyaz Zemin, Kırmızı Çizgi */
-        .btn-red { background-color: #ffffff; color: #dc2626; border: 1px solid #fca5a5; }
-        .btn-red:hover { background-color: #fef2f2; border-color: #ef4444; }
+        /* Çıkış, Sil vb. Butonlar */
+        .btn-danger { color: #dc2626 !important; border-color: #fca5a5 !important; background-color: #fff !important; }
+        .btn-danger:hover { background-color: #fef2f2 !important; border-color: #ef4444 !important; }
 
-        /* 3. A4 GÖRÜNÜMÜ - Kusursuz Hizalama */
+        /* 3. A4 GÖRÜNÜMÜ */
         .page-container { 
             background: white; padding: 15mm 20mm; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
@@ -90,53 +90,53 @@
         .page-container th, .page-container td { border: 1px solid #000; padding: 4px 6px; font-size: 10pt; vertical-align: middle; }
         .page-container th { background-color: #f8fafc; }
         .page-container input, .page-container textarea { border: none; width: 100%; background: transparent; font-family: inherit; font-size: inherit; outline: none; padding: 2px; resize: none; }
-        .page-container input:focus, .page-container textarea:focus { background: #f0f9ff; box-shadow: inset 0 0 0 1px #38bdf8; }
+        .page-container input:focus, .page-container textarea:focus { background: #f0f9ff; box-shadow: inset 0 0 0 1px #94a3b8; }
         .page-container .section { margin-bottom: 25px; }
 
-        .page-footer { position: fixed; bottom: 0; left: 380px; width: calc(100% - 380px); background: white; color: #64748b; padding: 10px; text-align: center; font-size: 11px; z-index: 50; border-top: 1px solid #e2e8f0; }
+        .page-footer { position: fixed; bottom: 0; left: 320px; width: calc(100% - 320px); background: white; color: #64748b; padding: 10px; text-align: center; font-size: 11px; z-index: 50; border-top: 1px solid #e2e8f0; }
         .footer-edit-area { margin-top: 30px; padding: 15px; border-top: 1px dashed #cbd5e1; font-family: 'Segoe UI', sans-serif; font-size: 11px; color: #64748b; }
         .footer-input { width: 100%; margin-top: 5px; border: 1px solid #cbd5e1; padding: 6px; border-radius: 4px; font-size: 12px; }
 
-        /* 4. MODAL AYARLARI VE TAM EKRAN VERİ GİRİŞİ */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1000; overflow-y: auto; backdrop-filter: blur(2px); }
-        .modal-content { background: white; width: 96vw; max-width: 1200px; margin: 4vh auto; padding: 25px; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; }
+        /* 4. MODAL VE SEKMELER (TABS) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); z-index: 1000; overflow-y: auto; backdrop-filter: blur(2px); }
+        .modal-content { background: white; width: 90vw; max-width: 1000px; margin: 5vh auto; padding: 25px; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; }
         
-        /* FİRMA VERİ GİRİŞ EKRANINI 100% TAM EKRAN YAPIYORUZ */
-        #modalFirmData .modal-content {
-            width: 100vw !important; height: 100vh !important; max-width: 100vw !important; margin: 0 !important; border-radius: 0 !important;
-        }
-        #modalFirmData .kunye-container { height: calc(100vh - 85px) !important; display: flex; gap: 20px; overflow: hidden; }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 15px; }
         .modal-title { font-size: 18px; font-weight: 700; color: #0f172a; }
         
-        .kunye-sidebar { flex: 0 0 350px; overflow-y: auto; padding-right: 15px; border-right: 1px solid #e2e8f0; }
-        .kunye-sidebar::-webkit-scrollbar { width: 5px; } .kunye-sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .kunye-main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+        /* Sekme Menüsü (Tabs) */
+        .tab-nav { display: flex; gap: 5px; border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; }
+        .tab-btn { padding: 10px 20px; background: transparent; border: none; font-weight: 600; font-size: 13px; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+        .tab-btn:hover { color: #334155; }
+        .tab-btn.active { color: #0f172a; border-bottom: 2px solid #1e293b; }
         
-        .kunye-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-        .kunye-group { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; background: #f8fafc; margin-bottom: 15px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Künye Tablosu Formları */
+        .kunye-grid-layout { display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
+        .kunye-group { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; background: #f8fafc; }
         .kunye-group h4 { margin: 0 0 12px 0; font-size: 13px; color: #334155; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; }
-        .form-item { margin-bottom: 8px; }
+        .kunye-grid-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .form-item { margin-bottom: 10px; }
         .form-item label { display: block; font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px; }
         .form-item input, .form-item select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; background: #fff; }
         
-        /* 5. DEVASA VE RAHAT EXCEL TABLOSU */
-        .grid-wrapper { overflow: auto; flex: 1; border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; height: 100%; }
+        /* Firma Modalını Büyütme (Veri Girişi İçin Geniş Ekran) */
+        #modalFirmData .modal-content { width: 96vw; max-width: 1400px; height: 92vh; margin: 4vh auto; }
+        #tabVeri { height: calc(100vh - 200px); display: flex; flex-direction: column; }
+        
+        /* 5. DEVASA EXCEL TABLOSU (Renkler Kaldırıldı, Sadece Gri) */
+        .grid-wrapper { overflow: auto; flex: 1; border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; }
         .excel-grid { width: 100%; min-width: 2200px; border-collapse: separate; border-spacing: 0; font-size: 12px; }
         .excel-grid th { position: sticky; top: 0; z-index: 10; padding: 10px 6px; text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; font-weight: 700; color: #334155; }
         
-        /* Göz yormayan kurumsal pastel renk ayrımları */
-        .th-month { background: #f1f5f9; width: 70px; left: 0; position: sticky; z-index: 20; }
-        .grp-kdv { background: #f0fdf4; border-bottom: 2px solid #22c55e !important; }
-        .grp-yev { background: #fffbeb; border-bottom: 2px solid #f59e0b !important; }
-        .grp-keb { background: #fdf4ff; border-bottom: 2px solid #d946ef !important; }
-        .grp-env { background: #eff6ff; border-bottom: 2px solid #3b82f6 !important; }
-        .grp-sgk { background: #fef2f2; border-bottom: 2px solid #ef4444 !important; }
+        .th-month { background: #f8fafc; width: 70px; left: 0; position: sticky; z-index: 20; }
+        .grp-kdv, .grp-yev, .grp-keb, .grp-env, .grp-sgk { background: #f8fafc; border-bottom: 2px solid #64748b !important; }
         
         .excel-grid td { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 0; background: #fff; }
         .excel-grid input { width: 100%; height: 100%; border: none; padding: 10px 6px; margin: 0; outline: none; text-align: right; background: transparent; font-size: 13px; }
-        .excel-grid input:focus { background: #eff6ff; font-weight: bold; }
+        .excel-grid input:focus { background: #f1f5f9; font-weight: bold; }
         .excel-grid td:first-child { position: sticky; left: 0; background: #f8fafc; z-index: 5; text-align: center; font-weight: bold; border-right: 2px solid #cbd5e1; }
         
         .partners-table { width: 100%; font-size: 11px; margin-bottom: 10px; }
@@ -146,11 +146,11 @@
 
         /* GİRİŞ EKRANI */
         #authScreen { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 9999; justify-content: center; align-items: center; }
-        .auth-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; font-family: 'Segoe UI', sans-serif; border: 1px solid #e2e8f0; }
-        .auth-box h2 { margin-bottom: 25px; color: #0f172a; font-size: 24px; font-weight: 700; }
-        .auth-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: #f8fafc; }
-        .btn-auth { width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
-        .btn-login { background: #2563eb; } .btn-login:hover { background: #1d4ed8; } 
+        .auth-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 380px; text-align: center; border: 1px solid #e2e8f0; font-family: 'Segoe UI', sans-serif;}
+        .auth-box h2 { margin-bottom: 25px; color: #0f172a; font-size: 22px; font-weight: 700; }
+        .auth-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 14px; background: #f8fafc; }
+        .btn-auth { width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 4px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .btn-login { background: #1e293b; } .btn-login:hover { background: #0f172a; } 
         .btn-register { background: #ffffff; color: #475569; border: 1px solid #cbd5e1; margin-top: 10px; } .btn-register:hover { background: #f8fafc; color: #0f172a; }
 
         /* KUSURSUZ YAZDIRMA AYARLARI */
@@ -249,47 +249,40 @@
     <div id="modalFirmData" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title">📂 Firma Tam Künye ve Veri Girişi</span>
+                <span class="modal-title">Firma Tam Künye ve Veri Girişi</span>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn btn-green" onclick="saveFirmData()">💾 KAYDET VE ÇIK</button>
-                    <button class="btn btn-red" onclick="closeModal('modalFirmData')">İptal</button>
+                    <button class="btn btn-primary" onclick="saveFirmData()">💾 KAYDET VE ÇIK</button>
+                    <button class="btn" onclick="closeModal('modalFirmData')">İptal</button>
                 </div>
             </div>
 
-            <div class="kunye-container">
-                                
-                <div class="kunye-sidebar">
-                    
-                    <div style="background:#e8f6f3; padding:10px; margin-bottom:10px; border-radius:4px;">
-                        <label style="font-weight:bold;">Çalışma Yılı:</label>
-                        <select id="editYearSelect" onchange="renderGrid()" style="width:100px; font-weight:bold;">
-                            <option value="2024">2024</option>
-                            <option value="2025">2025</option>
-                            <option value="2026">2026</option>
-                            <option value="2027">2027</option>
-                        </select>
-                    </div>
+            <div class="tab-nav">
+                <button class="tab-btn active" id="btnTabKunye" onclick="switchFirmTab('kunye')">1. Firma Künyesi</button>
+                <button class="tab-btn" id="btnTabVeri" onclick="switchFirmTab('veri')">2. Aylık Veri Girişi (Defter/Beyanname)</button>
+            </div>
 
+            <div id="tabKunye" class="tab-content active">
+                <div class="kunye-grid-layout">
                     <div class="kunye-group">
                         <h4>1. Temel Firma Bilgileri</h4>
                         <div class="form-item"><label>Firma Unvanı</label><input type="text" id="editFirmName"></div>
                         <div class="form-item"><label>Adres</label><input type="text" id="editFirmAddress"></div>
-                        <div class="kunye-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="kunye-grid-row">
                             <div class="form-item"><label>Vergi Dairesi / No</label><input type="text" id="editFirmTax"></div>
                             <div class="form-item"><label>Telefon / Faks</label><input type="text" id="editFirmPhone"></div>
                         </div>
                         <div class="form-item"><label>Yaptığı İş (Faaliyet Konusu)</label><input type="text" id="editFirmJob"></div>
-                        <div style="margin-top:5px; font-size:11px;">
-                            <strong>Sektör:</strong> 
-                            <label><input type="checkbox" id="chkTed">Tedarikçi</label>
-                            <label><input type="checkbox" id="chkImal">İmalatçı</label>
-                            <label><input type="checkbox" id="chkHiz">Hizmet</label>
+                        <div style="margin-top:5px; font-size:12px; color:#475569; font-weight:600;">
+                            Sektör: 
+                            <label style="margin-left:10px;"><input type="checkbox" id="chkTed"> Tedarikçi</label>
+                            <label style="margin-left:10px;"><input type="checkbox" id="chkImal"> İmalatçı</label>
+                            <label style="margin-left:10px;"><input type="checkbox" id="chkHiz"> Hizmet</label>
                         </div>
                     </div>
 
                     <div class="kunye-group">
                         <h4>2. Resmi Sicil Bilgileri</h4>
-                        <div class="kunye-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="kunye-grid-row">
                             <div class="form-item"><label>Ticaret Sicil No</label><input type="text" id="editFirmSicil"></div>
                             <div class="form-item"><label>Oda Sicil No</label><input type="text" id="editFirmOda"></div>
                             <div class="form-item"><label>Sanayi Sicil No</label><input type="text" id="editFirmSanayi"></div>
@@ -299,48 +292,58 @@
 
                     <div class="kunye-group">
                         <h4>3. Ortaklar ve SMMM</h4>
-                        <label style="font-size:11px; font-weight:bold; color:#666;">Ortaklık Yapısı:</label>
+                        <label style="font-size:11px; font-weight:bold; color:#64748b;">Ortaklık Yapısı:</label>
                         <table class="partners-table" id="tblPartners">
-                            <thead><tr><th>Adı Soyadı</th><th>TC Kimlik</th><th>Hisse (%)</th><th></th></tr></thead>
+                            <thead><tr><th>Adı Soyadı</th><th>TC Kimlik</th><th>Hisse (%)</th><th width="50"></th></tr></thead>
                             <tbody></tbody>
                         </table>
-                        <button class="btn btn-orange" style="padding:2px 8px; font-size:11px; margin-top:5px;" onclick="addPartnerRow()">+ Ortak Ekle</button>
+                        <button class="btn" style="padding:4px 10px; font-size:11px; margin-top:5px;" onclick="addPartnerRow()">+ Ortak Ekle</button>
                         
                         <div style="margin-top:15px;">
-                            <label style="font-size:11px; font-weight:bold; color:#666;">Şirket SMMM'si (Muhasebeci):</label>
-                            <input type="text" id="editFirmSMMM" placeholder="Adı Soyadı - İletişim">
+                            <label style="font-size:11px; font-weight:bold; color:#64748b;">Şirket SMMM'si (Muhasebeci):</label>
+                            <input type="text" id="editFirmSMMM" placeholder="Adı Soyadı - İletişim" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:4px; font-size:12px;">
                         </div>
                     </div>
-
                 </div>
+            </div>
 
+            <div id="tabVeri" class="tab-content">
+                <div style="background:#f8fafc; padding:10px 15px; margin-bottom:15px; border-radius:6px; border:1px solid #e2e8f0; display:inline-flex; align-items:center;">
+                    <label style="font-weight:700; font-size:12px; margin-right:10px; color:#475569;">Çalışma Yılı Seçiniz:</label>
+                    <select id="editYearSelect" onchange="renderGrid()" style="width:120px; font-weight:600; padding:6px; border:1px solid #cbd5e1; border-radius:4px; font-size:13px;">
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
                 
-                        <table class="excel-grid" id="dataGrid">
-                            <thead>
-                                <tr>
-                                    <th class="th-month"></th>
-                                    <th colspan="10" class="grp-kdv">1. KDV BEYANNAMESİ</th>
-                                    <th colspan="3" class="grp-yev">2. YEVMİYE</th>
-                                    <th colspan="3" class="grp-keb">3. KEBİR</th>
-                                    <th colspan="3" class="grp-env">4. ENVANTER</th>
-                                    <th colspan="2" class="grp-sgk">5. MUHTASAR</th>
-                                </tr>
-                                <tr>
-                                    <th class="th-month">AY</th>
-                                    <th title="Matrah Toplamı">Matrah</th><th title="Hesaplanan KDV">Hes.KDV</th><th title="İlave Edilecek KDV">İlave</th><th title="Toplam KDV">Top.KDV</th>
-                                    <th title="Önceki Dön. Dev. İnd. KDV">Önc.Dev</th><th title="Yurtiçi Alımlara İlişkin KDV">Yurtiçi</th><th title="İndirimler Toplamı">İnd.KDV</th>
-                                    <th title="Ödenecek KDV">Öde.KDV</th><th title="Sonraki Döneme Dev. KDV">Sonr.Dev</th><th title="Tahakkuk Fişi Tarih ve No">Tahakkuk</th>
-                                    
-                                    <th title="Yev. Tarih">Tarih</th><th title="Yev. Dönem">Dönem</th><th title="Yev. Tasdik No">Tasdik No</th>
-                                    <th title="Keb. Tarih">Tarih</th><th title="Keb. Dönem">Dönem</th><th title="Keb. Tasdik No">Tasdik No</th>
-                                    <th title="Env. Noter">Noter</th><th title="Env. Tarih">Tarih</th><th title="Env. No">Tasdik No</th>
-                                    
-                                    <th title="İşçi">İşçi</th><th title="Muh. Tahakkuk">Tahakkuk</th>
-                                </tr>
-                            </thead>
-                            <tbody id="gridBody"></tbody>
-                        </table>
-                    </div>
+                <div class="grid-wrapper">
+                    <table class="excel-grid" id="dataGrid">
+                        <thead>
+                            <tr>
+                                <th class="th-month"></th>
+                                <th colspan="10" class="grp-kdv">1. KDV BEYANNAMESİ</th>
+                                <th colspan="3" class="grp-yev">2. YEVMİYE</th>
+                                <th colspan="3" class="grp-keb">3. KEBİR</th>
+                                <th colspan="3" class="grp-env">4. ENVANTER</th>
+                                <th colspan="2" class="grp-sgk">5. MUHTASAR</th>
+                            </tr>
+                            <tr>
+                                <th class="th-month">AY</th>
+                                <th title="Matrah Toplamı">Matrah</th><th title="Hesaplanan KDV">Hes.KDV</th><th title="İlave Edilecek KDV">İlave</th><th title="Toplam KDV">Top.KDV</th>
+                                <th title="Önceki Dön. Dev. İnd. KDV">Önc.Dev</th><th title="Yurtiçi Alımlara İlişkin KDV">Yurtiçi</th><th title="İndirimler Toplamı">İnd.KDV</th>
+                                <th title="Ödenecek KDV">Öde.KDV</th><th title="Sonraki Döneme Dev. KDV">Sonr.Dev</th><th title="Tahakkuk Fişi Tarih ve No">Tahakkuk</th>
+                                
+                                <th title="Yev. Tarih">Tarih</th><th title="Yev. Dönem">Dönem</th><th title="Yev. Tasdik No">Tasdik No</th>
+                                <th title="Keb. Tarih">Tarih</th><th title="Keb. Dönem">Dönem</th><th title="Keb. Tasdik No">Tasdik No</th>
+                                <th title="Env. Noter">Noter</th><th title="Env. Tarih">Tarih</th><th title="Env. No">Tasdik No</th>
+                                
+                                <th title="İşçi">İşçi</th><th title="Muh. Tahakkuk">Tahakkuk</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gridBody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -350,16 +353,17 @@
         <div class="control-header">
             <div>
                 <img src="Logo.png" alt="KitPro Logo">
-                <h3 style="margin: 10px 0 0 0; color: #1e293b; font-family: 'Segoe UI', sans-serif; letter-spacing: -0.5px; font-size: 18px;">Karşıt İnceleme Robotu</h3>
+                <h3 style="margin: 10px 0 0 0; color: #0f172a; font-family: 'Segoe UI', sans-serif; letter-spacing: -0.5px; font-size: 16px;">Sistem Kontrol Paneli</h3>
             </div>
-            <div class="control-header-buttons">
-                <button class="btn btn-blue" onclick="openExcelArsivi()">📊 Excel Veri Arşivi</button>
-                <button class="btn btn-purple" onclick="openTutanakArsivi()">📂 Tutanak Arşivi</button>
-                <button class="btn btn-dark" onclick="saveTutanak()">📝 Tutanağı Arşive Kaydet</button>
-                <button class="btn btn-green" onclick="window.print()">🖨️ YAZDIR</button>
-                <button class="btn btn-red" onclick="clearAllData()">🗑️ Ekranı Temizle</button>
-                <button class="btn btn-red" style="background:#b91c1c;" onclick="logout()">🚪 Çıkış</button>
-            </div>
+        </div>
+        
+        <div class="control-header-buttons" style="margin-bottom: 20px;">
+            <button class="btn" onclick="openExcelArsivi()">📊 Excel Arşivi</button>
+            <button class="btn" onclick="openTutanakArsivi()">📂 Tutanak Arşivi</button>
+            <button class="btn" onclick="saveTutanak()">📝 Arşive Kaydet</button>
+            <button class="btn" onclick="window.print()">🖨️ Yazdır</button>
+            <button class="btn" onclick="clearAllData()">🗑️ Temizle</button>
+            <button class="btn btn-danger" onclick="logout()">🚪 Çıkış</button>
         </div>
         
         <div class="control-filters">
@@ -372,22 +376,22 @@
                 <label>2. YMM</label>
                 <select id="ymmSelect" onchange="handleYMMChange()"></select>
                 <div style="display:flex; gap:5px;">
-                    <button class="btn btn-dark" style="flex:1;" onclick="openModal('modalYMMManager')" title="Yeni YMM Ekle">+ Yeni YMM</button>
-                    <button class="btn btn-orange" id="btnEditYmm" onclick="editSelectedYMM()" title="Seçili YMM'yi Düzenle" disabled>✏️ Düzenle</button>
+                    <button class="btn" style="flex:1;" onclick="openModal('modalYMMManager')" title="Yeni YMM Ekle">+ Yeni YMM</button>
+                    <button class="btn" id="btnEditYmm" onclick="editSelectedYMM()" title="Seçili YMM'yi Düzenle" disabled>Düzenle</button>
                 </div>
             </div>
             <div class="control-group">
                 <label>3. Müşteri</label>
                 <select id="clientSelect" onchange="handleClientChange()"></select>
-                <button class="btn btn-orange" id="btnEditClient" onclick="editSelectedClient()" title="Seçili Müşteriyi Düzenle" disabled>✏️ Müşteri Düzenle</button>
+                <button class="btn" id="btnEditClient" onclick="editSelectedClient()" title="Seçili Müşteriyi Düzenle" disabled>Müşteri Düzenle</button>
             </div>
             <div class="control-divider"></div>
             <div class="control-group">
                 <label>4. Firma (Kaynak)</label>
                 <select id="firmSelect" onchange="handleFirmChange()"></select>
                 <div style="display:flex; gap:5px;">
-                    <button class="btn btn-green" style="flex:1;" onclick="addNewFirm()">+ Yeni Firma</button>
-                    <button class="btn btn-orange" id="btnEditFirm" onclick="editFirm()" disabled>KÜNYE & VERİ</button>
+                    <button class="btn" style="flex:1;" onclick="addNewFirm()">+ Yeni Firma</button>
+                    <button class="btn" id="btnEditFirm" onclick="editFirm()" disabled>KÜNYE & VERİ</button>
                 </div>
             </div>
         </div>
@@ -930,6 +934,7 @@
 
         // --- FİRMA KÜNYE / KDV-MATRAH (CRUD) ---
         let currentEditingFirmId = null;
+        
         function addNewFirm() {
             currentEditingFirmId = null;
             ['editFirmName','editFirmAddress','editFirmTax','editFirmPhone','editFirmJob','editFirmSicil','editFirmOda','editFirmSanayi','editFirmKapasite','editFirmSMMM'].forEach(id=>document.getElementById(id).value='');
@@ -937,6 +942,7 @@
             document.getElementById('tblPartners').getElementsByTagName('tbody')[0].innerHTML = "";
             const repDate = document.getElementById('reportDate').value; if(repDate) document.getElementById('editYearSelect').value = repDate.split('-')[0];
             openModal('modalFirmData'); renderGrid();
+            switchFirmTab('kunye'); // İlk sekmeyi açar
         }
 
         function editFirm() {
@@ -952,6 +958,20 @@
             if(f.partners) { f.partners.forEach(p => addPartnerRow(p.name, p.tc, p.share)); }
             const repDate = document.getElementById('reportDate').value; if(repDate) { const y = repDate.split('-')[0]; document.getElementById('editYearSelect').value = y; }
             renderGrid(); openModal('modalFirmData');
+            switchFirmTab('kunye'); // İlk sekmeyi açar
+        }
+
+        // SEKMELER ARASI GEÇİŞ FONKSİYONU (YENİ EKLENDİ)
+        function switchFirmTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if(tabId === 'kunye') {
+                document.getElementById('tabKunye').classList.add('active');
+                document.getElementById('btnTabKunye').classList.add('active');
+            } else {
+                document.getElementById('tabVeri').classList.add('active');
+                document.getElementById('btnTabVeri').classList.add('active');
+            }
         }
 
         function saveFirmData() {
