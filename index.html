@@ -55,7 +55,7 @@
 .btn-login:hover { background: #219150; }
 .btn-register { background: #2980b9; }
 .btn-register:hover { background: #2471a3; }
-}
+
         
         h2 { font-size: 14pt; margin-bottom: 8px; text-align: center; text-transform: uppercase; text-decoration: underline; }
         
@@ -970,8 +970,12 @@
             ['yevTarih','yevDonem','yevNo','kebTarih','kebDonem','kebNo','envNoter','envTarih','envNo','isci','muhtasar'].forEach(k => {
                 const el = document.getElementById(`val_${k}`); if(el) { el.value = safe(c[k]); autoResize(el); }
             });
-        }
-        
+
+            // Buluttan Excel Listelerini Çek ve Ekrana Bas
+            renderAlisListesi(year, String(mIdx + 1).padStart(2, '0'), f);
+            renderSatisListesi(year, String(mIdx + 1).padStart(2, '0'), f);
+        } // <-- updateReportView fonksiyonunun kapanış parantezi BURADA olmalı!
+
         function formatMoney(val) {
             if(!val) return ""; if(typeof val === 'string' && val.includes(',')) return val;
             let num = parseFloat(val); if(isNaN(num)) return val;
@@ -999,28 +1003,61 @@
         }
 
         function processInvoiceData(rows) {
-            const repDate = document.getElementById('reportDate').value; if (!repDate) { alert("Lütfen önce Tutanak Dönemi seçiniz!"); return; }
-            const [targetYear, targetMonth] = repDate.split('-');
-            let filtered = [];
+            const repDate = document.getElementById('reportDate').value; 
+            if (!repDate) { alert("Lütfen önce Tutanak Dönemi seçiniz!"); return; }
+            const fIdx = document.getElementById('firmSelect').value;
+            if (fIdx === "") { alert("Lütfen önce 4. Firma (Kaynak) seçiniz!"); return; }
+
+            // Yüklenen Excel'deki TÜM verileri parçala ve yıllara göre ayarla
+            let yearData = [];
             rows.forEach(row => {
                 let rDate = row[2]; let rAmount = parseFloat(row[4]) || 0; let rKDV = parseFloat(row[5]) || 0;
                 let jsDate; if (typeof rDate === 'number') { jsDate = new Date(Math.round((rDate - 25569)*86400*1000)); } else if (typeof rDate === 'string') { jsDate = new Date(rDate); }
                 if (jsDate && !isNaN(jsDate)) {
                     let y = jsDate.getFullYear().toString(); let m = String(jsDate.getMonth() + 1).padStart(2, '0');
-                    if (y === targetYear && m === targetMonth) {
-                        filtered.push({ unvan: row[0] || "", vkn: row[1] || "", tarih: `${jsDate.getDate()}.${m}.${y}`, seri: row[3] || "", tutar: rAmount, kdv: rKDV });
-                    }
+                    yearData.push({ unvan: row[0] || "", vkn: row[1] || "", tarih: `${String(jsDate.getDate()).padStart(2,'0')}.${m}.${y}`, seri: row[3] || "", tutar: rAmount, kdv: rKDV, yil: y, ay: m });
                 }
             });
-            filtered.sort((a, b) => b.tutar - a.tutar); const top10 = filtered.slice(0, 10);
-            const tbody = document.getElementById('tblAlis').getElementsByTagName('tbody')[0]; tbody.innerHTML = "";
-            if(top10.length === 0) { alert("Seçilen döneme ait fatura bulunamadı!"); return; }
+
+            // Verileri Firmanın profiline Kalıcı Olarak Kaydet (Firebase için)
+            const firm = AppData.Firms[fIdx];
+            if(!firm.alisFaturalari) firm.alisFaturalari = {};
+            
+            const yearsInExcel = [...new Set(yearData.map(d => d.yil))];
+            yearsInExcel.forEach(y => {
+                firm.alisFaturalari[y] = yearData.filter(d => d.yil === y);
+            });
+
+            saveData(); // Buluta kaydet
+            alert(`Tebrikler! Alış faturaları buluta başarıyla kaydedildi.\nEklenen / Güncellenen Yıllar: ${yearsInExcel.join(', ')}`);
+
+            // Seçili ayı ekrana bas
+            const [targetYear, targetMonth] = repDate.split('-');
+            renderAlisListesi(targetYear, targetMonth, firm);
+        }
+
+        function renderAlisListesi(targetYear, targetMonth, firm) {
+            const tbody = document.getElementById('tblAlis').getElementsByTagName('tbody')[0];
+            const defaultRows = `<tr><td>1</td><td><textarea class="report-field" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)"></textarea></td></tr>
+                                 <tr><td>2</td><td><textarea class="report-field" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)"></textarea></td></tr>`;
+            
+            tbody.innerHTML = "";
+
+            if(!firm || !firm.alisFaturalari || !firm.alisFaturalari[targetYear]) {
+                tbody.innerHTML = defaultRows; return; // Bulutta veri yoksa boş satırları getir
+            }
+
+            const filtered = firm.alisFaturalari[targetYear].filter(d => d.ay === targetMonth);
+            filtered.sort((a, b) => b.tutar - a.tutar); 
+            const top10 = filtered.slice(0, 10);
+
+            if(top10.length === 0) { tbody.innerHTML = defaultRows; return; }
+
             top10.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td>${index+1}</td><td><textarea class="report-field" oninput="autoResize(this)">${item.unvan}</textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)">${item.vkn}</textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)">${item.tarih}</textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)">${item.seri}</textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)">${formatMoney(item.tutar)}</textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)">${formatMoney(item.kdv)}</textarea></td>`;
                 tbody.appendChild(tr); tr.querySelectorAll('textarea').forEach(ta => autoResize(ta));
             });
-            alert(`${top10.length} adet fatura aktarıldı!`);
         }
         // --- SATIŞLAR (BÖLÜM 8) EXCEL FONKSİYONLARI ---
         function downloadSalesTemplate() {
@@ -1046,56 +1083,60 @@
         function processSalesData(rows) {
             const repDate = document.getElementById('reportDate').value; 
             if (!repDate) { alert("Lütfen önce 1. Tutanak Dönemi seçiniz!"); return; }
-            
-            const yIdx = document.getElementById('ymmSelect').value;
-            const cIdx = document.getElementById('clientSelect').value;
-            if (yIdx === "" || cIdx === "") { 
-                alert("Lütfen önce YMM ve Müşteri seçiniz! (Robot, Müşteri VKN'sine göre Excel'den filtreleme yapacaktır)"); 
-                return; 
-            }
-            
-            // HATA ÇÖZÜMÜ 1: VKN boş olsa bile sistemin patlamaması için güvenli hale getirildi.
-            const clientTax = (AppData.YMMs[yIdx].clients[cIdx].tax || "").toString().trim();
-            if(!clientTax) { 
-                alert("Seçili 3. Müşterinin Vergi/TC numarası eksik! Lütfen YMM menüsünden müşteri bilgilerini güncelleyin."); 
-                return; 
-            }
+            const fIdx = document.getElementById('firmSelect').value;
+            if (fIdx === "") { alert("Lütfen önce 4. Firma (Kaynak) seçiniz!"); return; }
 
-            const [targetYear, targetMonth] = repDate.split('-');
-            let filtered = [];
-            
+            let yearData = [];
             rows.forEach(row => {
-                let rDate = row[0]; 
-                let rFatNo = row[1] || "";
-                let rVkn = (row[2] || "").toString().trim(); // Alıcı VKN
-                let rAmount = parseFloat(row[3]) || 0; 
-                let rKDV = parseFloat(row[4]) || 0;
-                let rYevmiye = row[5] || "";
+                let rDate = row[0]; let rFatNo = row[1] || ""; let rVkn = (row[2] || "").toString().trim();
+                let rAmount = parseFloat(row[3]) || 0; let rKDV = parseFloat(row[4]) || 0; let rYevmiye = row[5] || "";
 
                 let jsDate; 
                 if (typeof rDate === 'number') { jsDate = new Date(Math.round((rDate - 25569)*86400*1000)); } 
                 else if (typeof rDate === 'string') { jsDate = new Date(rDate); }
                 
                 if (jsDate && !isNaN(jsDate)) {
-                    let y = jsDate.getFullYear().toString(); 
-                    let m = String(jsDate.getMonth() + 1).padStart(2, '0');
-                    
-                    // YENİ DÜZELTME BURADA: clientTax.includes(rVkn) kullanıyoruz!
-                    // Böylece müşteri kartında "KADIKÖY / 1234567890" yazsa bile içindeki sayıyı yakalayacak.
-                    if (y === targetYear && m === targetMonth && rVkn !== "" && clientTax.includes(rVkn)) {
-                        filtered.push({ tarih: `${jsDate.getDate()}.${m}.${y}`, faturaNo: rFatNo, tutar: rAmount, kdv: rKDV, yevmiye: rYevmiye });
-                    }
+                    let y = jsDate.getFullYear().toString(); let m = String(jsDate.getMonth() + 1).padStart(2, '0');
+                    // Excel'deki TÜM veriyi yılına/ayına göre ayırıp hafızaya alıyoruz
+                    yearData.push({ tarih: `${String(jsDate.getDate()).padStart(2,'0')}.${m}.${y}`, faturaNo: rFatNo, vkn: rVkn, tutar: rAmount, kdv: rKDV, yevmiye: rYevmiye, yil: y, ay: m });
                 }
             });
             
-            // HATA ÇÖZÜMÜ 2: Eğer eşleşen fatura yoksa, tabloyu SİLMEDEN kullanıcıya uyarı veriyoruz.
-            if(filtered.length === 0) { 
-                alert(`Seçilen döneme ve seçili müşteriye (İçinde ${clientTax} geçen) ait satış faturası bulunamadı!`); 
-                return; 
-            }
+            const firm = AppData.Firms[fIdx];
+            if(!firm.satisFaturalari) firm.satisFaturalari = {};
+            
+            const yearsInExcel = [...new Set(yearData.map(d => d.yil))];
+            yearsInExcel.forEach(y => {
+                firm.satisFaturalari[y] = yearData.filter(d => d.yil === y);
+            });
 
+            saveData();
+            alert(`Tebrikler! Satış faturaları buluta başarıyla kaydedildi.\nEklenen / Güncellenen Yıllar: ${yearsInExcel.join(', ')}`);
+
+            const [targetYear, targetMonth] = repDate.split('-');
+            renderSatisListesi(targetYear, targetMonth, firm);
+        }
+
+        function renderSatisListesi(targetYear, targetMonth, firm) {
             const tbody = document.getElementById('tblSatis').getElementsByTagName('tbody')[0]; 
-            tbody.innerHTML = ""; // Artık elimizde veri olduğuna emin olduğumuz için eski tabloyu güvenle silebiliriz.
+            const defaultRow = `<tr><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-center" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field text-right" oninput="autoResize(this)"></textarea></td><td><textarea class="report-field" oninput="autoResize(this)"></textarea></td></tr>`;
+            tbody.innerHTML = "";
+
+            const yIdx = document.getElementById('ymmSelect').value;
+            const cIdx = document.getElementById('clientSelect').value;
+            
+            // Eğer veritabanında bu yıla ait veri yoksa veya filtreleme için Müşteri seçilmemişse boş satır göster
+            if(!firm || !firm.satisFaturalari || !firm.satisFaturalari[targetYear] || yIdx === "" || cIdx === "") { 
+                tbody.innerHTML = defaultRow; return; 
+            }
+            
+            const clientTax = (AppData.YMMs[yIdx].clients[cIdx].tax || "").toString().trim();
+            if(!clientTax) { tbody.innerHTML = defaultRow; return; }
+
+            // Tüm yılın içerisinden sadece Seçili Aya ve Seçili Müşterinin VKN'sine ait olanları dinamik olarak süz
+            const filtered = firm.satisFaturalari[targetYear].filter(d => d.ay === targetMonth && d.vkn !== "" && clientTax.includes(d.vkn));
+            
+            if(filtered.length === 0) { tbody.innerHTML = defaultRow; return; }
             
             filtered.forEach((item) => {
                 const tr = document.createElement('tr');
@@ -1106,10 +1147,8 @@
                     <td><textarea class="report-field text-right" oninput="autoResize(this)">${formatMoney(item.kdv)}</textarea></td>
                     <td><textarea class="report-field" oninput="autoResize(this)">${item.yevmiye}</textarea></td>
                 `;
-                tbody.appendChild(tr); 
-                tr.querySelectorAll('textarea').forEach(ta => autoResize(ta));
+                tbody.appendChild(tr); tr.querySelectorAll('textarea').forEach(ta => autoResize(ta));
             });
-            alert(`${filtered.length} adet ilgili satış faturası aktarıldı!`);
         }
 
         function handleFirmChange() {
@@ -1132,11 +1171,15 @@
         function handleClientChange() {
              const y = document.getElementById('ymmSelect').value; const c = document.getElementById('clientSelect').value;
              
-             // Müşteri seçiliyse düzenleme butonunu aktif et
              const btnEditC = document.getElementById('btnEditClient'); if(btnEditC) btnEditC.disabled = (c === "");
              
              if(y!=="" && c!=="") { const cli = AppData.YMMs[y].clients[c]; setText('disp_clientName', cli.name); setText('disp_clientTax', cli.tax); setText('disp_clientAddress', cli.address); setText('disp_clientContract', cli.contract); }
              else { setText('disp_clientName', ''); setText('disp_clientTax', ''); setText('disp_clientAddress', ''); setText('disp_clientContract', ''); }
+             
+             // Müşteri değiştiğinde, eğer firma da seçiliyse tüm ekranı ve satış listesini tetikle
+             if(document.getElementById('firmSelect').value !== "") {
+                 updateReportView();
+             }
         }
         function saveNewYMM() {
              const n=document.getElementById('newYmmName').value; if(!n)return;
