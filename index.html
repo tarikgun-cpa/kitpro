@@ -7,38 +7,98 @@
     <title>CPA-FTC Pro Karşıt İnceleme Robotu </title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
-    <style>
+   <style>
         /* TEMEL AYARLAR VE KURUMSAL YAPI */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; 
-            background: #e2e8f0; /* Kurumsal açık gri arkaplan */
+            background: #e9eef5; /* Premium gri/mavi arkaplan */
             display: flex; 
-            justify-content: center; /* Sağdaki devasa boşluğu yok eder, ekranı ortalar */
-            align-items: flex-start; 
-            gap: 40px; 
-            padding: 40px 20px 80px 20px;
+            margin: 0;
+            padding: 0;
             color: #334155;
         }
+
+        /* 1. GERÇEK KURUMSAL SAAS SIDEBAR (TAM BOY) */
+        .control-bar { 
+            background: #1e293b; /* Koyu Lacivert Premium Tema */
+            color: #f8fafc;
+            width: 380px; 
+            height: 100vh; 
+            position: sticky; 
+            top: 0; 
+            flex-shrink: 0; 
+            display: flex; 
+            flex-direction: column; 
+            padding: 25px;
+            /* Elemanları sıkıştırarak scroll (kaydırma) çıkmasını engelliyoruz */
+            overflow-y: auto; 
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            border-right: 1px solid #0f172a;
+        }
         
-        /* A4 GÖRÜNÜMÜ - Gerçekçi ve nizami kağıt tasarımı */
+        .control-header { text-align: center; border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 15px; }
+        .control-header img { height: 45px; border-radius: 4px; margin-bottom: 10px; background: white; padding: 4px; }
+        .control-header h3 { font-size: 16px; color: #f8fafc; font-weight: 600; margin: 0; letter-spacing: 0.5px; }
+        
+        /* 2. BUTONLARI IZGARAYA ALARAK DİKEY ALANDAN TASARRUF (Scroll'u bitirir) */
+        .control-header-buttons { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* 2 Sütun Yan Yana */
+            gap: 8px; 
+        }
+        
+        .control-filters { display: flex; flex-direction: column; gap: 12px; }
+        .control-group { display: flex; flex-direction: column; gap: 4px; }
+        .control-group label { color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* 3. İNPUTLAR İÇİN PREMIUM KARANLIK TEMA */
+        .control-group select, .control-group input[type="month"] { 
+            width: 100%; border: 1px solid #475569; background-color: #0f172a; color: #f8fafc; 
+            border-radius: 4px; padding: 8px 10px; font-size: 13px; font-family: inherit; font-weight: 500;
+        }
+        .control-group select:focus, .control-group input:focus { border-color: #38bdf8; outline: none; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
+        .control-divider { height: 1px; background: #334155; margin: 4px 0; }
+        
+        /* 4. KURUMSAL BUTON RENKLERİ (Cırtlak renkler iptal) */
+        .btn { 
+            border-radius: 4px; font-weight: 500; padding: 8px 10px; font-size: 12px; border: 1px solid transparent; 
+            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+            font-family: inherit;
+        }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        /* Üst Menü Ana Butonları (Ağırbaşlı Mavi/Gri/Yeşil/Kırmızı Tonlar) */
+        .btn-blue { background-color: #3b82f6; color: #fff; } .btn-blue:hover { background-color: #2563eb; }
+        .btn-purple { background-color: #6366f1; color: #fff; } .btn-purple:hover { background-color: #4f46e5; }
+        .btn-dark { background-color: #475569; color: #fff; } .btn-dark:hover { background-color: #334155; }
+        .btn-green { background-color: #10b981; color: #fff; } .btn-green:hover { background-color: #059669; }
+        .btn-red { background-color: #ef4444; color: #fff; } .btn-red:hover { background-color: #dc2626; }
+        
+        /* Form İçi İkincil Butonlar (Yeni Ekle, Düzenle vs.) - Kurumsal Gri Çizgili */
+        .btn-orange { background-color: #334155; color: #f8fafc; border: 1px solid #475569; }
+        .btn-orange:hover { background-color: #475569; color: #fff; border-color: #64748b; }
+
+        /* 5. A4 GÖRÜNÜMÜ - Ekranın geri kalanına mükemmel ortalanır */
         .page-container { 
             background: white; 
-            padding: 15mm 20mm; /* Standart resmi evrak kenar boşluğu */
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.05); 
+            padding: 15mm 20mm; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
             width: 210mm; 
             min-height: 297mm; 
             flex-shrink: 0;
-            border-radius: 2px;
+            border-radius: 4px;
             font-family: 'Times New Roman', Times, serif; 
             font-size: 11pt; 
             color: #000;
             line-height: 1.4;
+            /* Sol sidebar'dan sonraki kalan boşluğa otomatik ortalar: */
+            margin: 40px auto 100px auto; 
             position: relative;
         }
 
-        /* A4 İÇİ TABLOLAR VE FORMLAR (Kurumsal Çizgiler) */
+        /* A4 İÇİ TABLOLAR VE FORMLAR */
         .page-container table { width: 100%; border-collapse: collapse; margin: 8px 0 20px 0; }
         .page-container th, .page-container td { border: 1px solid #000; padding: 4px 6px; font-size: 10pt; vertical-align: middle; }
         .page-container th { background-color: #f8fafc; }
@@ -48,67 +108,13 @@
         .page-container input:focus, .page-container textarea:focus { background: #f0f9ff; box-shadow: inset 0 0 0 1px #38bdf8; }
         .page-container .section { margin-bottom: 25px; }
 
-        /* SOL YAN MENÜ (KURUMSAL KONTROL PANELİ) */
-        .control-bar { 
-            background: #ffffff; 
-            padding: 24px; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); 
-            border: 1px solid #cbd5e1; 
-            position: sticky; top: 40px; 
-            width: 320px; flex-shrink: 0; 
-            max-height: calc(100vh - 80px); overflow-y: auto; 
-            display: flex; flex-direction: column; gap: 20px;
-        }
-        .control-bar::-webkit-scrollbar { width: 4px; }
-        .control-bar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        
-        .control-header { text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; }
-        .control-header img { height: 50px; border-radius: 4px; margin-bottom: 12px; }
-        .control-header h3 { font-size: 16px; color: #0f172a; font-weight: 600; letter-spacing: -0.3px; margin-bottom: 15px;}
-        .control-header-buttons { display: flex; flex-direction: column; gap: 6px; }
-        
-        .control-filters { display: flex; flex-direction: column; gap: 16px; }
-        .control-group { display: flex; flex-direction: column; gap: 6px; }
-        .control-group label { color: #475569; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .control-group select, .control-group input[type="month"] { 
-            width: 100%; border: 1px solid #cbd5e1; background-color: #fff; color: #0f172a; 
-            border-radius: 4px; padding: 8px 10px; font-size: 13px; font-family: inherit; font-weight: 500;
-        }
-        .control-group select:focus, .control-group input:focus { border-color: #2563eb; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        .control-divider { height: 1px; background: #e2e8f0; margin: 4px 0; }
-        
-        /* KURUMSAL BUTONLAR (Rengarenk Görünüm İptal Edildi) */
-        .btn { 
-            border-radius: 4px; font-weight: 500; padding: 8px 12px; font-size: 12px; border: 1px solid transparent; 
-            cursor: pointer; transition: background-color 0.15s; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-            font-family: inherit;
-        }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        
-        /* Ana İşlemler (Koyu Lacivert - Kurumsal) */
-        .btn-blue, .btn-purple, .btn-dark { background-color: #1e293b; color: #fff; }
-        .btn-blue:hover, .btn-purple:hover, .btn-dark:hover { background-color: #0f172a; }
-        
-        /* Olumlu/Onay İşlem (Zarif Yeşil) */
-        .btn-green { background-color: #059669; color: #fff; }
-        .btn-green:hover { background-color: #047857; }
-        
-        /* İkincil / Düzenleme Butonları (Açık Gri / Çizgili - Eskinin Turuncusu) */
-        .btn-orange { background-color: #f8fafc; color: #334155; border: 1px solid #cbd5e1; }
-        .btn-orange:hover { background-color: #f1f5f9; color: #0f172a; border-color: #94a3b8; }
-        
-        /* İptal / Çıkış (Mat Kırmızı) */
-        .btn-red { background-color: #dc2626; color: #fff; }
-        .btn-red:hover { background-color: #b91c1c; }
-
-        /* FOOTER VE DİĞER SABİT ALANLAR (Sağa Kayma Engellendi) */
-        .page-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #1e293b; color: #94a3b8; padding: 10px; text-align: center; font-size: 11px; z-index: 50; }
+        /* FOOTER VE DİĞER SABİT ALANLAR (Sadece Rapor Alanının Altında Görünür) */
+        .page-footer { position: fixed; bottom: 0; left: 380px; width: calc(100% - 380px); background: white; color: #64748b; padding: 10px; text-align: center; font-size: 11px; z-index: 50; border-top: 1px solid #cbd5e1; }
         .footer-edit-area { margin-top: 30px; padding: 15px; border-top: 1px dashed #cbd5e1; font-family: 'Segoe UI', sans-serif; font-size: 11px; color: #64748b; }
         .footer-input { width: 100%; margin-top: 5px; border: 1px solid #cbd5e1; padding: 6px; border-radius: 4px; font-size: 12px; }
 
         /* MODAL VE AÇILIR PENCERE AYARLARI */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1000; overflow-y: auto; backdrop-filter: blur(4px); }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 1000; overflow-y: auto; backdrop-filter: blur(4px); }
         .modal-content { background: white; width: 96vw; max-width: 1200px; margin: 4vh auto; padding: 25px; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
         .modal-title { font-size: 18px; font-weight: 600; color: #0f172a; }
