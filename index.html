@@ -8,22 +8,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
    <style>
-        /* TEMEL AYARLAR VE KURUMSAL YAPI */
+        /* TEMEL AYARLAR VE SADE KURUMSAL YAPI */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body { 
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif; 
-            background: #e9eef5; /* Premium gri/mavi arkaplan */
+            background: #f1f5f9; /* Çok hafif, göz yormayan gri arkaplan */
             display: flex; 
             margin: 0;
             padding: 0;
             color: #334155;
         }
 
-        /* 1. GERÇEK KURUMSAL SAAS SIDEBAR (TAM BOY) */
+        /* 1. AYDINLIK, FERAH YAN MENÜ (SADECE BEYAZ VE GRİ TONLAR) */
         .control-bar { 
-            background: #1e293b; /* Koyu Lacivert Premium Tema */
-            color: #f8fafc;
+            background: #ffffff; /* Bembeyaz, ferah arkaplan */
+            color: #334155;
             width: 380px; 
             height: 100vh; 
             position: sticky; 
@@ -32,130 +32,126 @@
             display: flex; 
             flex-direction: column; 
             padding: 25px;
-            /* Elemanları sıkıştırarak scroll (kaydırma) çıkmasını engelliyoruz */
             overflow-y: auto; 
-            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
-            border-right: 1px solid #0f172a;
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
         }
         
-        .control-header { text-align: center; border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 15px; }
-        .control-header img { height: 45px; border-radius: 4px; margin-bottom: 10px; background: white; padding: 4px; }
-        .control-header h3 { font-size: 16px; color: #f8fafc; font-weight: 600; margin: 0; letter-spacing: 0.5px; }
+        .control-header { text-align: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px; }
+        .control-header img { height: 75px; margin-bottom: 15px; } /* LOGO BÜYÜTÜLDÜ */
+        .control-header h3 { font-size: 16px; color: #0f172a; font-weight: 700; margin: 0; letter-spacing: 0px; }
         
-        /* 2. BUTONLARI IZGARAYA ALARAK DİKEY ALANDAN TASARRUF (Scroll'u bitirir) */
-        .control-header-buttons { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; /* 2 Sütun Yan Yana */
-            gap: 8px; 
-        }
+        .control-header-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        .control-filters { display: flex; flex-direction: column; gap: 12px; }
-        .control-group { display: flex; flex-direction: column; gap: 4px; }
-        .control-group label { color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .control-filters { display: flex; flex-direction: column; gap: 16px; }
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
+        .control-group label { color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        /* 3. İNPUTLAR İÇİN PREMIUM KARANLIK TEMA */
+        /* İNPUTLAR İÇİN SADE, MODERN ÇİZGİLER */
         .control-group select, .control-group input[type="month"] { 
-            width: 100%; border: 1px solid #475569; background-color: #0f172a; color: #f8fafc; 
-            border-radius: 4px; padding: 8px 10px; font-size: 13px; font-family: inherit; font-weight: 500;
+            width: 100%; border: 1px solid #cbd5e1; background-color: #f8fafc; color: #1e293b; 
+            border-radius: 6px; padding: 10px 12px; font-size: 13px; font-family: inherit; font-weight: 600;
+            transition: all 0.2s;
         }
-        .control-group select:focus, .control-group input:focus { border-color: #38bdf8; outline: none; box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2); }
-        .control-divider { height: 1px; background: #334155; margin: 4px 0; }
+        .control-group select:focus, .control-group input:focus { background-color: #ffffff; border-color: #3b82f6; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .control-divider { height: 1px; background: #f1f5f9; margin: 5px 0; }
         
-        /* 4. KURUMSAL BUTON RENKLERİ (Cırtlak renkler iptal) */
+        /* 2. BUTONLAR: RENK CÜMBÜŞÜNE SON! (Referans görselindeki sadelik) */
         .btn { 
-            border-radius: 4px; font-weight: 500; padding: 8px 10px; font-size: 12px; border: 1px solid transparent; 
+            border-radius: 6px; font-weight: 600; padding: 10px 12px; font-size: 12px; border: 1px solid transparent; 
             cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
             font-family: inherit;
         }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        /* Üst Menü Ana Butonları (Ağırbaşlı Mavi/Gri/Yeşil/Kırmızı Tonlar) */
-        .btn-blue { background-color: #3b82f6; color: #fff; } .btn-blue:hover { background-color: #2563eb; }
-        .btn-purple { background-color: #6366f1; color: #fff; } .btn-purple:hover { background-color: #4f46e5; }
-        .btn-dark { background-color: #475569; color: #fff; } .btn-dark:hover { background-color: #334155; }
-        .btn-green { background-color: #10b981; color: #fff; } .btn-green:hover { background-color: #059669; }
-        .btn-red { background-color: #ef4444; color: #fff; } .btn-red:hover { background-color: #dc2626; }
+        /* Standart İşlem Butonları (Beyaz Zemin, İnce Çizgi, Koyu Gri Yazı) */
+        .btn-blue, .btn-purple, .btn-dark, .btn-orange { background-color: #ffffff; color: #475569; border: 1px solid #cbd5e1; }
+        .btn-blue:hover, .btn-purple:hover, .btn-dark:hover, .btn-orange:hover { background-color: #f8fafc; color: #0f172a; border-color: #94a3b8; }
         
-        /* Form İçi İkincil Butonlar (Yeni Ekle, Düzenle vs.) - Kurumsal Gri Çizgili */
-        .btn-orange { background-color: #334155; color: #f8fafc; border: 1px solid #475569; }
-        .btn-orange:hover { background-color: #475569; color: #fff; border-color: #64748b; }
+        /* Ana Eylem Butonları (Yazdır, Kaydet) - Kurumsal Mavi */
+        .btn-green { background-color: #2563eb; color: #ffffff; border: none; }
+        .btn-green:hover { background-color: #1d4ed8; }
+        
+        /* Tehlikeli İşlemler (Sil, Çıkış) - Beyaz Zemin, Kırmızı Çizgi */
+        .btn-red { background-color: #ffffff; color: #dc2626; border: 1px solid #fca5a5; }
+        .btn-red:hover { background-color: #fef2f2; border-color: #ef4444; }
 
-        /* 5. A4 GÖRÜNÜMÜ - Ekranın geri kalanına mükemmel ortalanır */
+        /* 3. A4 GÖRÜNÜMÜ - Kusursuz Hizalama */
         .page-container { 
-            background: white; 
-            padding: 15mm 20mm; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            width: 210mm; 
-            min-height: 297mm; 
-            flex-shrink: 0;
-            border-radius: 4px;
-            font-family: 'Times New Roman', Times, serif; 
-            font-size: 11pt; 
-            color: #000;
-            line-height: 1.4;
-            /* Sol sidebar'dan sonraki kalan boşluğa otomatik ortalar: */
-            margin: 40px auto 100px auto; 
-            position: relative;
+            background: white; padding: 15mm 20mm; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); 
+            width: 210mm; min-height: 297mm; flex-shrink: 0;
+            border-radius: 4px; font-family: 'Times New Roman', Times, serif; 
+            font-size: 11pt; color: #000; line-height: 1.4;
+            margin: 40px auto 100px auto; position: relative;
         }
 
-        /* A4 İÇİ TABLOLAR VE FORMLAR */
         .page-container table { width: 100%; border-collapse: collapse; margin: 8px 0 20px 0; }
         .page-container th, .page-container td { border: 1px solid #000; padding: 4px 6px; font-size: 10pt; vertical-align: middle; }
         .page-container th { background-color: #f8fafc; }
-        .page-container input, .page-container textarea { 
-            border: none; width: 100%; background: transparent; font-family: inherit; font-size: inherit; outline: none; padding: 2px; resize: none;
-        }
+        .page-container input, .page-container textarea { border: none; width: 100%; background: transparent; font-family: inherit; font-size: inherit; outline: none; padding: 2px; resize: none; }
         .page-container input:focus, .page-container textarea:focus { background: #f0f9ff; box-shadow: inset 0 0 0 1px #38bdf8; }
         .page-container .section { margin-bottom: 25px; }
 
-        /* FOOTER VE DİĞER SABİT ALANLAR (Sadece Rapor Alanının Altında Görünür) */
-        .page-footer { position: fixed; bottom: 0; left: 380px; width: calc(100% - 380px); background: white; color: #64748b; padding: 10px; text-align: center; font-size: 11px; z-index: 50; border-top: 1px solid #cbd5e1; }
+        .page-footer { position: fixed; bottom: 0; left: 380px; width: calc(100% - 380px); background: white; color: #64748b; padding: 10px; text-align: center; font-size: 11px; z-index: 50; border-top: 1px solid #e2e8f0; }
         .footer-edit-area { margin-top: 30px; padding: 15px; border-top: 1px dashed #cbd5e1; font-family: 'Segoe UI', sans-serif; font-size: 11px; color: #64748b; }
         .footer-input { width: 100%; margin-top: 5px; border: 1px solid #cbd5e1; padding: 6px; border-radius: 4px; font-size: 12px; }
 
-        /* MODAL VE AÇILIR PENCERE AYARLARI */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.75); z-index: 1000; overflow-y: auto; backdrop-filter: blur(4px); }
-        .modal-content { background: white; width: 96vw; max-width: 1200px; margin: 4vh auto; padding: 25px; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
-        .modal-title { font-size: 18px; font-weight: 600; color: #0f172a; }
+        /* 4. MODAL AYARLARI VE TAM EKRAN VERİ GİRİŞİ */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); z-index: 1000; overflow-y: auto; backdrop-filter: blur(2px); }
+        .modal-content { background: white; width: 96vw; max-width: 1200px; margin: 4vh auto; padding: 25px; border-radius: 8px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: flex; flex-direction: column; font-family: 'Segoe UI', sans-serif; }
         
-        .kunye-container { display: flex; gap: 20px; overflow: hidden; }
+        /* FİRMA VERİ GİRİŞ EKRANINI 100% TAM EKRAN YAPIYORUZ */
+        #modalFirmData .modal-content {
+            width: 100vw !important; height: 100vh !important; max-width: 100vw !important; margin: 0 !important; border-radius: 0 !important;
+        }
+        #modalFirmData .kunye-container { height: calc(100vh - 85px) !important; display: flex; gap: 20px; overflow: hidden; }
+
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .modal-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+        
         .kunye-sidebar { flex: 0 0 350px; overflow-y: auto; padding-right: 15px; border-right: 1px solid #e2e8f0; }
+        .kunye-sidebar::-webkit-scrollbar { width: 5px; } .kunye-sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .kunye-main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+        
         .kunye-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
-        .kunye-group { border: 1px solid #e2e8f0; padding: 15px; border-radius: 4px; background: #f8fafc; margin-bottom: 15px; }
+        .kunye-group { border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; background: #f8fafc; margin-bottom: 15px; }
         .kunye-group h4 { margin: 0 0 12px 0; font-size: 13px; color: #334155; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; }
         .form-item { margin-bottom: 8px; }
-        .form-item label { display: block; font-size: 11px; color: #475569; font-weight: 600; margin-bottom: 4px; }
-        .form-item input, .form-item select { width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; }
+        .form-item label { display: block; font-size: 11px; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+        .form-item input, .form-item select { width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; background: #fff; }
         
-        .grid-wrapper { overflow: auto; flex: 1; border: 1px solid #cbd5e1; margin-top: 15px; background: #fff; border-radius: 4px; }
-        .excel-grid { width: 100%; min-width: 1800px; border-collapse: collapse; font-size: 11px; }
-        .excel-grid th { position: sticky; top: 0; z-index: 10; padding: 8px; text-align: center; border: 1px solid #cbd5e1; }
-        .th-month { background: #f1f5f9; width: 60px; left: 0; position: sticky; z-index: 20; }
-        .grp-kdv { background: #f0fdf4; color: #166534; border-bottom: 2px solid #166534 !important; }
-        .grp-yev { background: #fffbeb; color: #92400e; border-bottom: 2px solid #92400e !important; }
-        .grp-keb { background: #fdf4ff; color: #86198f; border-bottom: 2px solid #86198f !important; }
-        .grp-env { background: #eff6ff; color: #1e40af; border-bottom: 2px solid #1e40af !important; }
-        .grp-sgk { background: #fef2f2; color: #991b1b; border-bottom: 2px solid #991b1b !important; }
-        .excel-grid td { border: 1px solid #e2e8f0; padding: 0; }
-        .excel-grid input { width: 100%; height: 100%; border: none; padding: 6px 4px; margin: 0; outline: none; text-align: right; background: transparent; }
-        .excel-grid input:focus { background: #e0f2fe; font-weight: bold; }
-        .excel-grid td:first-child { position: sticky; left: 0; background: #f8fafc; z-index: 5; text-align: center; font-weight: bold; border-right: 1px solid #cbd5e1; }
-        .paste-area { width: 100%; height: 60px; border: 1px dashed #94a3b8; padding: 10px; font-family: monospace; font-size: 11px; background: #f8fafc; color: #475569; border-radius: 4px; }
+        /* 5. DEVASA VE RAHAT EXCEL TABLOSU */
+        .grid-wrapper { overflow: auto; flex: 1; border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; height: 100%; }
+        .excel-grid { width: 100%; min-width: 2200px; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+        .excel-grid th { position: sticky; top: 0; z-index: 10; padding: 10px 6px; text-align: center; border-right: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; font-weight: 700; color: #334155; }
+        
+        /* Göz yormayan kurumsal pastel renk ayrımları */
+        .th-month { background: #f1f5f9; width: 70px; left: 0; position: sticky; z-index: 20; }
+        .grp-kdv { background: #f0fdf4; border-bottom: 2px solid #22c55e !important; }
+        .grp-yev { background: #fffbeb; border-bottom: 2px solid #f59e0b !important; }
+        .grp-keb { background: #fdf4ff; border-bottom: 2px solid #d946ef !important; }
+        .grp-env { background: #eff6ff; border-bottom: 2px solid #3b82f6 !important; }
+        .grp-sgk { background: #fef2f2; border-bottom: 2px solid #ef4444 !important; }
+        
+        .excel-grid td { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 0; background: #fff; }
+        .excel-grid input { width: 100%; height: 100%; border: none; padding: 10px 6px; margin: 0; outline: none; text-align: right; background: transparent; font-size: 13px; }
+        .excel-grid input:focus { background: #eff6ff; font-weight: bold; }
+        .excel-grid td:first-child { position: sticky; left: 0; background: #f8fafc; z-index: 5; text-align: center; font-weight: bold; border-right: 2px solid #cbd5e1; }
+        
         .partners-table { width: 100%; font-size: 11px; margin-bottom: 10px; }
         .partners-table th { background: #f1f5f9; text-align: left; padding: 6px; border-bottom: 1px solid #cbd5e1; }
         .partners-table td { padding: 4px; }
-        .partners-table input { width: 100%; border: 1px solid #cbd5e1; padding: 4px; border-radius: 2px; }
+        .partners-table input { width: 100%; border: 1px solid #cbd5e1; padding: 6px; border-radius: 4px; }
 
         /* GİRİŞ EKRANI */
-        #authScreen { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; justify-content: center; align-items: center; }
-        .auth-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); width: 100%; max-width: 380px; text-align: center; font-family: 'Segoe UI', sans-serif; }
-        .auth-box h2 { margin-bottom: 20px; color: #1e293b; font-size: 22px; }
-        .auth-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        .btn-auth { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 4px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
-        .btn-login { background: #059669; } .btn-login:hover { background: #047857; } 
-        .btn-register { background: #1e293b; } .btn-register:hover { background: #0f172a; }
+        #authScreen { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f1f5f9; z-index: 9999; justify-content: center; align-items: center; }
+        .auth-box { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; font-family: 'Segoe UI', sans-serif; border: 1px solid #e2e8f0; }
+        .auth-box h2 { margin-bottom: 25px; color: #0f172a; font-size: 24px; font-weight: 700; }
+        .auth-box input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; font-size: 14px; background: #f8fafc; }
+        .btn-auth { width: 100%; padding: 12px; margin-top: 15px; border: none; border-radius: 6px; color: white; font-weight: 600; cursor: pointer; font-size: 14px; transition: background 0.2s; }
+        .btn-login { background: #2563eb; } .btn-login:hover { background: #1d4ed8; } 
+        .btn-register { background: #ffffff; color: #475569; border: 1px solid #cbd5e1; margin-top: 10px; } .btn-register:hover { background: #f8fafc; color: #0f172a; }
 
         /* KUSURSUZ YAZDIRMA AYARLARI */
         @media print {
@@ -318,17 +314,7 @@
 
                 </div>
 
-                <div class="kunye-main">
-                    <div style="background: #fff8e1; padding: 10px; border: 1px solid #ffecb3; margin-bottom: 10px; border-radius:5px;">
-                        <strong>⚡ Excel'den Hızlı Yapıştır:</strong><br>
-                        <span style="font-size:10px; color:#555;">
-                            Sıra: <strong>Matrah | Hes.KDV | İlave | Top.KDV | Önc.Dev | Yurtiçi | İnd.KDV | Öd.KDV | Sonr.Dev | Tahakkuk | Yev(Tar-Dön-No) | Keb(Tar-Dön-No) | Env(Not-Tar-No) | İşçi | Muh.</strong>
-                        </span>
-                        <textarea id="pasteInput" class="paste-area" placeholder="Excel verisini buraya yapıştır..."></textarea>
-                        <button class="btn btn-orange" onclick="parsePasteData()">Dağıt</button>
-                    </div>
-
-                    <div class="grid-wrapper">
+                
                         <table class="excel-grid" id="dataGrid">
                             <thead>
                                 <tr>
