@@ -255,8 +255,7 @@
 
     <input type="file" id="invoiceExcelInput" accept=".xlsx, .xls" style="display:none" onchange="handleInvoiceUpload(this)">
     <input type="file" id="salesExcelInput" accept=".xlsx, .xls" style="display:none" onchange="handleSalesUpload(this)">
-    <input type="file" id="backupInput" accept=".json" style="display:none" onchange="uploadBackup(this)">
-
+    
     <div id="modalYMMManager" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
@@ -447,8 +446,8 @@
         
         <div style="margin-left:auto; display:flex; gap:10px;">
             <button class="btn btn-red" onclick="clearAllData()">🗑️ Temizle</button>
-            <button class="btn btn-dark" onclick="downloadBackup()">⬇️ Yedek İndir</button>
-            <button class="btn btn-dark" onclick="document.getElementById('backupInput').click()">⬆️ Yedek Yükle</button>
+            <button class="btn btn-purple" style="background:#8e44ad; color:white; border:none; padding:8px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="openTutanakArsivi()">📂 Tutanak Arşivi</button>
+            <button class="btn btn-dark" style="background:#2980b9; color:white; border:none; padding:8px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="saveTutanak()">📝 Tutanağı Arşive Kaydet</button>
             <button class="btn btn-purple" onclick="saveAllData()">💾 TÜMÜNÜ KAYDET</button>
             <button class="btn btn-green" onclick="window.print()">YAZDIR</button>
             <button class="btn btn-red" onclick="logout()">🚪 Çıkış</button>
@@ -646,6 +645,34 @@
         <span id="footerTextDisplay">Bu rapor CPA-FTC 💎 YMM Karşıt İnceleme Robotu ile oluşturulmuştur.</span>
     </div>
 
+    <div id="modalTutanakArsivi" class="modal">
+        <div class="modal-content" style="max-width: 900px; height: auto; max-height: 90vh;">
+            <div class="modal-header">
+                <span class="modal-title">📂 Kaydedilen Tutanaklar Arşivi</span>
+                <button class="btn btn-red" onclick="closeModal('modalTutanakArsivi')">X</button>
+            </div>
+            <div style="font-size: 11px; color: #666; margin-bottom: 10px;">
+                * Gönderim tarihini değiştirdiğinizde sistem otomatik olarak buluta kaydeder. Ekrana yüklediğiniz tutanak üzerinde değişiklik yapıp tekrar kaydedebilirsiniz.
+            </div>
+            <div style="overflow-y: auto;">
+                <table id="tblArsiv" style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: center;">
+                    <thead style="background: #eee; position: sticky; top: 0;">
+                        <tr>
+                            <th style="padding:8px; border:1px solid #ccc;">Dönem</th>
+                            <th style="padding:8px; border:1px solid #ccc;">YMM</th>
+                            <th style="padding:8px; border:1px solid #ccc;">Müşteri</th>
+                            <th style="padding:8px; border:1px solid #ccc;">Firma (Kaynak)</th>
+                            <th style="padding:8px; border:1px solid #ccc;">Gönderim Tarihi</th>
+                            <th style="padding:8px; border:1px solid #ccc;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <div id="authScreen">
         <div class="auth-box">
             <h2>🔒 YMM Robotu Giriş</h2>
@@ -678,7 +705,7 @@
         const db = firebase.firestore();
         let currentUser = null;
 
-        let AppData = { YMMs: [], Firms: [] };
+        let AppData = { YMMs: [], Firms: [], Tutanaklar: [] };
         const MONTHS = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 
         // --- KİMLİK DOĞRULAMA FONKSİYONLARI ---
@@ -716,12 +743,13 @@
     // 'users' koleksiyonu yerine herkesin okuyacağı 'shared_data' koleksiyonunu kullanıyoruz.
     db.collection('shared_data').doc('main_data').get().then(doc => {
         if (doc.exists) {
-            AppData = doc.data();
-            if(!AppData.YMMs) AppData.YMMs = [];
-            if(!AppData.Firms) AppData.Firms = [];
-        } else {
-            AppData = { YMMs: [], Firms: [] };
-        }
+                AppData = doc.data();
+                if(!AppData.YMMs) AppData.YMMs = [];
+                if(!AppData.Firms) AppData.Firms = [];
+                if(!AppData.Tutanaklar) AppData.Tutanaklar = [];
+            } else {
+                AppData = { YMMs: [], Firms: [], Tutanaklar: [] };
+            }
         renderSelects();
         updateReportView();
     }).catch(err => alert("Veri çekme hatası: " + err.message));
@@ -788,44 +816,116 @@
         function autoResize(textarea) { textarea.style.height = 'auto'; textarea.style.height = textarea.scrollHeight + 'px'; }
         function updateFooterText(val) { document.getElementById('footerTextDisplay').innerText = val; }
         
-        function downloadBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppData));
-            const downloadAnchorNode = document.createElement('a');
-            downloadAnchorNode.setAttribute("href", dataStr);
-            downloadAnchorNode.setAttribute("download", "KIT_Yedek_" + new Date().toISOString().slice(0,10) + ".json");
-            document.body.appendChild(downloadAnchorNode);
-            downloadAnchorNode.click();
-            downloadAnchorNode.remove();
+        // --- TUTANAK ARŞİVİ FONKSİYONLARI ---
+        function saveTutanak() {
+            const rDate = document.getElementById('reportDate').value;
+            const yIdx = document.getElementById('ymmSelect').value;
+            const cIdx = document.getElementById('clientSelect').value;
+            const fIdx = document.getElementById('firmSelect').value;
+
+            if (!rDate || yIdx === "" || cIdx === "" || fIdx === "") {
+                alert("Lütfen Tutanak Dönemi, YMM, Müşteri ve Firma (Kaynak) alanlarının hepsini eksiksiz seçtiğinizden emin olun!");
+                return;
+            }
+
+            if (!AppData.Tutanaklar) AppData.Tutanaklar = [];
+
+            // Aynı tutanak daha önce kaydedilmiş mi kontrol et
+            const existingIndex = AppData.Tutanaklar.findIndex(t => t.dId === rDate && t.yId === yIdx && t.cId === cIdx && t.fId === fIdx);
+
+            if (existingIndex > -1) {
+                alert("Uyarı: Bu döneme ait tutanak zaten arşivde kayıtlı! Değişiklik yaptıysanız 'Tümünü Kaydet' butonunu kullanabilirsiniz.");
+                return;
+            }
+
+            // Yeni tutanağı arşive ekle
+            AppData.Tutanaklar.push({
+                dId: rDate,
+                yId: yIdx,
+                cId: cIdx,
+                fId: fIdx,
+                gonderimTarihi: "", // Varsayılan olarak boş
+                kayitZamani: new Date().toISOString()
+            });
+
+            saveData();
+            alert("Tebrikler! Tutanak başarıyla arşive eklendi ve buluta kaydedildi. 📂");
         }
 
-        function uploadBackup(input) {
-            const file = input.files[0];
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const loadedData = JSON.parse(e.target.result);
-                    if(loadedData.YMMs && loadedData.Firms) {
-                        AppData = loadedData;
-                        
-                        // Kullanıcı giriş yapmışsa buluta yazdır
-                        if (currentUser) {
-                            db.collection('shared_data').doc('main_data').set(AppData)
-                                .then(() => {
-                                    // Buluta kayıt BİTTİKTEN sonra ekranı güncelle
-                                    renderSelects();
-                                    updateReportView();
-                                    alert("Yedek başarıyla yüklendi ve buluta (Firebase) kaydedildi! ☁️💾");
-                                })
-                                .catch(err => alert("Kayıt hatası: " + err.message));
-                        } else {
-                            alert("Lütfen verileri yüklemek için önce giriş yapın.");
-                        }
+        function openTutanakArsivi() {
+            const tbody = document.getElementById('tblArsiv').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = "";
 
-                    } else { alert("Hatalı yedek dosyası!"); }
-                } catch(ex) { alert("Dosya okunamadı: " + ex); }
-            };
-            reader.readAsText(file); input.value = "";
+            if (!AppData.Tutanaklar || AppData.Tutanaklar.length === 0) {
+                tbody.innerHTML = "<tr><td colspan='6' style='padding:15px;'>Henüz kaydedilmiş bir tutanak bulunmuyor.</td></tr>";
+                openModal('modalTutanakArsivi');
+                return;
+            }
+
+            // Yeniden eskiye sıralı liste
+            let list = [...AppData.Tutanaklar].reverse();
+
+            list.forEach((t, i) => {
+                const originalIndex = AppData.Tutanaklar.length - 1 - i;
+                const ymmName = AppData.YMMs[t.yId] ? AppData.YMMs[t.yId].name : "Silinmiş YMM";
+                const clientName = (AppData.YMMs[t.yId] && AppData.YMMs[t.yId].clients[t.cId]) ? AppData.YMMs[t.yId].clients[t.cId].name : "Silinmiş Müşteri";
+                const firmName = AppData.Firms[t.fId] ? AppData.Firms[t.fId].name : "Silinmiş Firma";
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:8px; border:1px solid #ccc;"><strong>${t.dId}</strong></td>
+                    <td style="padding:8px; border:1px solid #ccc;">${ymmName}</td>
+                    <td style="padding:8px; border:1px solid #ccc;">${clientName}</td>
+                    <td style="padding:8px; border:1px solid #ccc;">${firmName}</td>
+                    <td style="padding:8px; border:1px solid #ccc;">
+                        <input type="date" value="${t.gonderimTarihi}" onchange="updateGonderimTarihi(${originalIndex}, this.value)" style="border:1px solid #ccc; padding:3px; border-radius:3px; width:120px; font-family:inherit;">
+                    </td>
+                    <td style="padding:8px; border:1px solid #ccc;">
+                        <button class="btn btn-green" style="padding:4px 8px; font-size:11px;" onclick="loadTutanak(${originalIndex})" title="Tutanağı Ekrana Yükle">✏️ Yükle</button>
+                        <button class="btn btn-dark" style="padding:4px 8px; font-size:11px;" onclick="printTutanak(${originalIndex})" title="Hızlı Yazdır">🖨️ Yazdır</button>
+                        <button class="btn btn-red" style="padding:4px 8px; font-size:11px;" onclick="deleteTutanak(${originalIndex})" title="Arşivden Sil">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            openModal('modalTutanakArsivi');
+        }
+
+        function updateGonderimTarihi(index, dateVal) {
+            AppData.Tutanaklar[index].gonderimTarihi = dateVal;
+            saveData(); // Değişikliği anında buluta kaydet
+        }
+
+        function loadTutanak(index) {
+            const t = AppData.Tutanaklar[index];
+            if(!t) return;
+            
+            document.getElementById('reportDate').value = t.dId;
+            document.getElementById('ymmSelect').value = t.yId;
+            handleYMMChange(); // Müşterilerin listesini getirmesi için tetikle
+            document.getElementById('clientSelect').value = t.cId;
+            document.getElementById('firmSelect').value = t.fId;
+            
+            handleClientChange();
+            handleFirmChange();
+            
+            closeModal('modalTutanakArsivi');
+            alert("✅ Tutanak ekrana başarıyla yüklendi. Değişiklik yapabilir veya yazdırabilirsiniz.");
+        }
+
+        function printTutanak(index) {
+            loadTutanak(index);
+            // Verilerin ekrana yüklenmesi için ufak bir gecikme verip yazdırma komutunu tetikliyoruz
+            setTimeout(() => { window.print(); }, 800); 
+        }
+        
+        function deleteTutanak(index) {
+            if(confirm("Bu tutanağı arşivden silmek istediğinize emin misiniz? (Firma ve fatura verileriniz silinmez, sadece arşiv listesinden kalkar)")) {
+                AppData.Tutanaklar.splice(index, 1);
+                saveData();
+                openTutanakArsivi(); // Tabloyu güncelle
+            }
         }
 
         function renderSelects() {
