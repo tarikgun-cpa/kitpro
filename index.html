@@ -124,7 +124,10 @@
         
         /* Firma Modalını Büyütme (Veri Girişi İçin Geniş Ekran) */
         #modalFirmData .modal-content { width: 96vw; max-width: 1400px; height: 92vh; margin: 4vh auto; }
-        #tabVeri { height: calc(100vh - 200px); display: flex; flex-direction: column; }
+        
+        #tabKunye { height: calc(100vh - 200px); overflow-y: auto; padding-right: 15px; }
+        #tabVeri { height: calc(100vh - 200px); flex-direction: column; }
+        #tabVeri.active { display: flex !important; }
         
         /* 5. DEVASA EXCEL TABLOSU (Renkler Kaldırıldı, Sadece Gri) */
         .grid-wrapper { overflow: auto; flex: 1; border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; }
