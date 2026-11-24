@@ -430,6 +430,7 @@
                 <tr><td>Vergi Dairesi / No</td><td><input type="text" id="disp_firmTax" readonly></td></tr>
                 <tr><td>Adresi</td><td><input type="text" id="disp_firmAddress" readonly></td></tr>
                 <tr><td>Telefon / İş</td><td><input type="text" id="disp_firmInfo" readonly></td></tr>
+                <tr><td>Şirket SMMM</td><td><span id="disp_smmm" style="padding-left:2px; font-weight:bold;"></span></td></tr>
             </table>
         </div>
 
@@ -561,10 +562,15 @@
             <strong>Ortaklık Yapısı:</strong>
             <div id="disp_partners_div" style="border:1px solid #000; padding:5px; min-height:40px; margin-top:5px;"></div>
             <br>
-            <strong>Sektör / Faaliyet:</strong>
-            <span id="disp_sectors" style="margin-left:10px;">...</span>
-            <br><br>
-            <strong>Şirket SMMM:</strong> <span id="disp_smmm" style="margin-left:10px; font-weight:bold;"></span>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+                <div>
+                    <strong>Sektör / Faaliyet:</strong>
+                    <span id="disp_sectors" style="margin-left:10px;">...</span>
+                </div>
+                <div style="text-align: right;">
+                    
+                </div>
+            </div>
         </div>
 
         <div style="margin-top: 50px; display: flex; justify-content: space-between; text-align: center;">
@@ -888,6 +894,22 @@
              if(y!=="" && c!=="") { const cli = AppData.YMMs[y].clients[c]; setText('disp_clientName', cli.name); setText('disp_clientTax', cli.tax); setText('disp_clientAddress', cli.address); setText('disp_clientContract', cli.contract); }
              else { setText('disp_clientName', ''); setText('disp_clientTax', ''); setText('disp_clientAddress', ''); setText('disp_clientContract', ''); }
              if(document.getElementById('firmSelect').value !== "") updateReportView();
+        }
+
+        function saveNewYMM() {
+            const name = document.getElementById('newYmmName').value;
+            if(!name) return alert("Lütfen YMM Adı Soyadı giriniz!");
+            AppData.YMMs.push({
+                name: name,
+                company: document.getElementById('newYmmCompany').value,
+                address: document.getElementById('newYmmAddress').value,
+                phone: document.getElementById('newYmmPhone').value,
+                seal: document.getElementById('newYmmSeal').value,
+                clients: []
+            });
+            saveData();
+            closeModal('modalYMMManager');
+            renderSelects();
         }
 
         function editSelectedYMM() {
